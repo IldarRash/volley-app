@@ -2,7 +2,6 @@ package helpers
 
 import com.realworld.spring.webflux.dto.Article
 import com.realworld.spring.webflux.dto.request.CreateArticleRequest
-import com.realworld.spring.webflux.persistence.entity.ArticleEntity
 import java.time.Instant
 import java.util.*
 

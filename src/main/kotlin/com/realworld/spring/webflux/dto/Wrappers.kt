@@ -1,7 +1,6 @@
 package com.realworld.spring.webflux.api
 
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.realworld.spring.webflux.dto.view.ProfileView
 
 data class UserWrapper<T>(@JsonProperty("user") val content: T)
 

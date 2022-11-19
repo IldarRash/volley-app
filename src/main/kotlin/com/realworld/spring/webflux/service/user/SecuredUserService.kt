@@ -6,6 +6,7 @@ import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
 import com.realworld.spring.webflux.dto.view.UserView
 import com.realworld.spring.webflux.exceptions.InvalidRequestException
 import com.realworld.spring.webflux.dto.User
+import com.realworld.spring.webflux.dto.request.AdminUserRequest
 import com.realworld.spring.webflux.persistence.repository.UserDataService
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
@@ -44,13 +45,26 @@ class SecuredUserService(
             id = user.id,
             bio = request.bio ?: user.bio,
             image = request.image?: user.image,
-            followingIds = user.followingIds,
-            favoriteArticlesIds = user.favoriteArticlesIds,
             encodedPassword = request.password
                 ?. let {passwordService.encodePassword(request.password) }
                 ?: user.encodedPassword,
             username = resolveUsername(user, request.username) ,
-            email = resolveEmail(user, request.email)
+            email = resolveEmail(user, request.email),
+            player = user.player,
+            gender = user.gender
+        )
+    }
+
+    suspend fun prepareUserForAdmin(request: AdminUserRequest, user: User): User {
+        return User(
+                id = user.id,
+                bio = request.bio ?: user.bio,
+                image = request.image?: user.image,
+                encodedPassword = user.encodedPassword,
+                username = resolveUsername(user, request.username) ,
+                email = resolveEmail(user, request.email),
+                player = request.player,
+                gender = request.gender
         )
     }
 
@@ -82,7 +96,7 @@ class SecuredUserService(
 
     private fun createAuthenticationResponse(user: User): UserView {
         val token = userTokenProvider.getToken(user.id.toString())
-        return user.toUserView(token)
+        return user.toUserViewShort(token)
     }
 
     private fun usernameAlreadyInUseException() = InvalidRequestException("Username", "already in use")

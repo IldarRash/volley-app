@@ -2,7 +2,6 @@ package com.realworld.spring.webflux.persistence.repository
 
 import com.realworld.spring.webflux.dto.User
 import com.realworld.spring.webflux.exceptions.InvalidRequestException
-import com.realworld.spring.webflux.persistence.entity.ArticleEntity
 import com.realworld.spring.webflux.persistence.entity.UserEntity
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.toList
@@ -56,12 +55,6 @@ class UserDataService(
         return toUser(userEntity = userEntity)
     }
 
-    suspend fun findAuthorByArticle(article: ArticleEntity): User {
-        val userEntity = userRepository.findById(article.authorId)
-            .switchIfEmpty(Mono.error(InvalidRequestException("Author", "not found")))
-            .awaitSingle()
-        return toUser(userEntity = userEntity)
-    }
 
     private suspend fun toUser(userEntity: UserEntity): User {
         return userEntity.toUser()

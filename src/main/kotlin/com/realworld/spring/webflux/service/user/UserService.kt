@@ -27,23 +27,10 @@ class UserService(
         val (user, token) = userSession
         val userToSave = securedUserService.prepareUserForUpdate(request, user)
         val savedUser = userDataService.save(userToSave)
-        return savedUser.toUserView(token)
+        return savedUser.toUserViewShort(token)
     }
 
-    suspend fun getProfile(username: String, viewer: User?): ProfileView =
-        userDataService.findByUsernameOrFail(username).toProfileView(viewer)
+    suspend fun getProfile(username: String, viewer: User?): UserView =
+        userDataService.findByUsernameOrFail(username).toUserViewShort("")
 
-    suspend fun follow(username: String, futureFollower: User): ProfileView {
-        val userToFollow = userDataService.findByUsernameOrFail(username)
-        futureFollower.follow(userToFollow)
-        userDataService.save(futureFollower)
-        return userToFollow.toFollowedProfileView()
-    }
-
-    suspend fun unfollow(username: String, follower: User): ProfileView {
-        val userToUnfollow = userDataService.findByUsernameOrFail(username)
-        follower.unfollow(userToUnfollow)
-        userDataService.save(follower)
-        return userToUnfollow.toUnfollowedProfileView()
-    }
 }

@@ -1,7 +1,6 @@
 package com.realworld.spring.webflux.api
 
 import com.realworld.spring.webflux.dto.request.UpdateArticleRequest
-import com.realworld.spring.webflux.persistence.entity.ArticleEntity
 import com.realworld.spring.webflux.persistence.repository.ArticleRepository
 import com.realworld.spring.webflux.persistence.repository.TagRepository
 import com.realworld.spring.webflux.persistence.repository.UserRepository

@@ -5,37 +5,37 @@ import org.apache.commons.lang3.StringUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
+import reactor.core.publisher.Mono
 import java.util.*
+
+enum class Role {
+    User, Admin
+}
+
+enum class Gender {
+    Male, Female, Other
+}
 
 @Table("app_user")
 data class UserEntity(
-    @Id val id: Long?,
-    val username: String,
-    val encodedPassword: String,
-    val email: String,
-    val bio: String? = null,
-    val image: String? = null,
-    val followingIdsStr: String? = null,
-    val favoriteArticlesIdsStr: String? = null,
+        @Id val id: Long?,
+        val username: String,
+        val encodedPassword: String,
+        val email: String,
+        val bio: String? = null,
+        val image: String? = null,
+        val roles: List<Role> = listOf(Role.User),
+        val player: Player,
+        val gender: Gender
 ) {
     fun toUser() = User(
-        id = this.id,
-        username = this.username,
-        encodedPassword = this.encodedPassword,
-        email = this.email,
-        bio = this.bio,
-        image = this.image,
-        followingIds = stringToLongList(this.followingIdsStr),
-        favoriteArticlesIds = this.favoriteArticlesIdsStr?.split(",") ?: listOf()
+       id = this.id,
+       username = this.username,
+       encodedPassword = this.encodedPassword,
+       email = this.email,
+       bio = this.bio,
+       image = this.image,
+       gender = gender,
+       player = player
     )
-
-    fun getFavoriteArticlesIds() =
-        this.favoriteArticlesIdsStr?.split(",") ?: listOf()
-
-    fun stringToLongList(inStr: String?): List<Long> {
-        return if (inStr == null || inStr.isEmpty())
-            return listOf()
-        else
-            inStr.split(",").map { it.toLong() }
-    }
 }

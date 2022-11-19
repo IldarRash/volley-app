@@ -1,7 +1,5 @@
 package com.realworld.spring.webflux.dto
 
-import com.realworld.spring.webflux.persistence.entity.ArticleEntity
-import com.realworld.spring.webflux.persistence.entity.Comment
 import com.realworld.spring.webflux.persistence.entity.UserEntity
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.LastModifiedDate

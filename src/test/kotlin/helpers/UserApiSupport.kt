@@ -6,7 +6,6 @@ import com.realworld.spring.webflux.api.toUserWrapper
 import com.realworld.spring.webflux.dto.request.UpdateUserRequest
 import com.realworld.spring.webflux.dto.request.UserAuthenticationRequest
 import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
-import com.realworld.spring.webflux.dto.view.ProfileView
 import com.realworld.spring.webflux.dto.view.UserView
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
