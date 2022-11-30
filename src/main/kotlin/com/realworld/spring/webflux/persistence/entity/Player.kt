@@ -1,9 +1,7 @@
 package com.realworld.spring.webflux.persistence.entity
 
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import org.springframework.data.mongodb.core.mapping.Field
-
+import com.realworld.spring.webflux.dto.view.FullPlayerView
+import com.realworld.spring.webflux.dto.view.ShortPlayerView
 
 
 enum class Position {
@@ -29,4 +27,8 @@ data class PlayerProps(
 data class Player (
         val positions: List<PlayerPosition> = listOf(),
         val playerProps: List<PlayerProps> = listOf()
-)
+) {
+    fun toShortView() = ShortPlayerView(this.positions)
+
+    fun toFullView() = FullPlayerView(this.positions, this.playerProps)
+}

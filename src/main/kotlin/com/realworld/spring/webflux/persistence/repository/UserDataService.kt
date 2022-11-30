@@ -10,7 +10,9 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.util.*
 
 @Component
 class UserDataService(
@@ -22,7 +24,7 @@ class UserDataService(
         return userEntity.toUser()
     }
 
-    suspend fun findById(userId: Long): User {
+    suspend fun findById(userId: UUID): User {
         val userEntity = userRepository.findById(userId).awaitSingle()
         return toUser(userEntity = userEntity)
     }
@@ -55,8 +57,9 @@ class UserDataService(
         return toUser(userEntity = userEntity)
     }
 
+    suspend fun getAllUsers(): Flux<User> = userRepository.findAll().map { toUser(userEntity = it) }
 
-    private suspend fun toUser(userEntity: UserEntity): User {
+    private fun toUser(userEntity: UserEntity): User {
         return userEntity.toUser()
     }
 }

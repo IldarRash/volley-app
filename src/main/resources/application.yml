@@ -6,6 +6,10 @@ logging:
 #    io.r2dbc: DEBUG
 
 spring:
+  jpa:
+    generate: true
   data.mongodb.auto-index-creation: true
   r2dbc.initialization-mode: always
-  mongodb.embedded.version: 3.5.5
+  mongodb:
+    embedded:
+      version: 4.0.2

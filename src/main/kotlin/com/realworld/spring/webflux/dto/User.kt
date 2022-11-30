@@ -5,9 +5,10 @@ import com.realworld.spring.webflux.dto.view.UserViewShort
 import com.realworld.spring.webflux.persistence.entity.Gender
 import com.realworld.spring.webflux.persistence.entity.Player
 import com.realworld.spring.webflux.persistence.entity.UserEntity
+import java.util.UUID
 
 class User(
-    val id: Long? = null,
+    val id: UUID? = null,
     val username: String,
     val encodedPassword: String,
     val email: String,
@@ -17,7 +18,7 @@ class User(
     val image: String? = null,
 ) {
     fun toUserEntity() = UserEntity(
-        id = this.id,
+        id = this.id ?: UUID.randomUUID(),
         username = this.username,
         encodedPassword = this.encodedPassword,
         email = this.email,
@@ -33,14 +34,15 @@ class User(
         username = this.username,
         bio = this.bio,
         image = this.image,
+        player = this.player.toShortView()
     )
 
-    fun toUserViewPlayer() = UserViewPlayer(
+    fun toUserViewPlayerFull() = UserViewPlayer(
             email = this.email,
             username = this.username,
             bio = this.bio,
             image = this.image,
-            player = this.player
+            player = this.player.toFullView()
     )
 
     override fun equals(other: Any?): Boolean {

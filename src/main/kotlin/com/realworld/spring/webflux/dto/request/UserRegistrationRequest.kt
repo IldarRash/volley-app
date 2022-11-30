@@ -7,11 +7,11 @@ import javax.validation.constraints.NotBlank
 
 data class UserRegistrationRequest(
         @field:NotBlank
-    val username: String,
+        val username: String,
         @field:Email
-    val email: String,
+        val email: String,
         @field:NotBlank
-    val password: String,
+        val password: String,
         @field:NotBlank
         val gender: Gender,
         val positions: List<PlayerPosition> = listOf(),

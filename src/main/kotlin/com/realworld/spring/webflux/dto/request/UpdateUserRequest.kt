@@ -24,8 +24,6 @@ data class AdminUserRequest(
         val email: String?,
         @field:NotBlankOrNull
         val username: String?,
-        @field:NotBlankOrNull
-        val password: String?,
         val image: String?,
         val bio: String?,
         val player: Player,

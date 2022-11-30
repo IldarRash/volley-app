@@ -9,6 +9,7 @@ import kotlinx.coroutines.reactor.awaitSingle
 import kotlinx.coroutines.reactor.awaitSingleOrNull
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
 import org.springframework.stereotype.Component
+import java.util.*
 
 @Component
 class UserSessionProvider(private val userDataService: UserDataService) {
@@ -23,7 +24,7 @@ class UserSessionProvider(private val userDataService: UserDataService) {
     suspend fun getCurrentUserSessionOrNull(): UserSession? {
         val context = ReactiveSecurityContextHolder.getContext().awaitSingleOrNull() ?: return null
         val tokenPrincipal = context.authentication.principal as TokenPrincipal
-        val user = userDataService.findById(tokenPrincipal.userId.toLong())
+        val user = userDataService.findById(UUID.fromString(tokenPrincipal.userId))
         return UserSession(user, tokenPrincipal.token)
     }
 }

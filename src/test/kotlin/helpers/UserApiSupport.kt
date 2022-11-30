@@ -1,6 +1,5 @@
 package helpers
 
-import com.realworld.spring.webflux.api.ProfileWrapper
 import com.realworld.spring.webflux.api.UserWrapper
 import com.realworld.spring.webflux.api.toUserWrapper
 import com.realworld.spring.webflux.dto.request.UpdateUserRequest
@@ -46,41 +45,6 @@ class UserApiSupport(private val client: WebTestClient) {
         .authorizationToken(token)
         .exchange()
         .expectBody<UserWrapper<UserView>>()
-        .returnResult()
-        .responseBody!!
-        .content
-
-    fun getProfile(username: String): ProfileView = client.get()
-        .uri("/api/profiles/$username")
-        .exchange()
-        .expectBody<ProfileWrapper>()
-        .returnResult()
-        .responseBody!!
-        .content
-
-    fun getProfile(username: String, token: String): ProfileView = client.get()
-        .uri("/api/profiles/$username")
-        .authorizationToken(token)
-        .exchange()
-        .expectBody<ProfileWrapper>()
-        .returnResult()
-        .responseBody!!
-        .content
-
-    fun follow(username: String, token: String): ProfileView = client.post()
-        .uri("/api/profiles/$username/follow")
-        .authorizationToken(token)
-        .exchange()
-        .expectBody<ProfileWrapper>()
-        .returnResult()
-        .responseBody!!
-        .content
-
-    fun unfollow(username: String, token: String): ProfileView = client.delete()
-        .uri("/api/profiles/$username/follow")
-        .authorizationToken(token)
-        .exchange()
-        .expectBody<ProfileWrapper>()
         .returnResult()
         .responseBody!!
         .content

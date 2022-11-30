@@ -1,11 +1,14 @@
 package com.realworld.spring.webflux.api
 
+import com.realworld.spring.webflux.dto.request.AdminUserRequest
 import com.realworld.spring.webflux.dto.request.UpdateUserRequest
 import com.realworld.spring.webflux.dto.request.UserAuthenticationRequest
 import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
 import com.realworld.spring.webflux.dto.view.UserView
 import com.realworld.spring.webflux.service.user.UserService
 import com.realworld.spring.webflux.user.UserSessionProvider
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.reactive.asFlow
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -29,7 +32,7 @@ class UserController(private val userService: UserService, private val userSessi
     @GetMapping("/user")
     suspend fun getCurrentUser(): UserWrapper<UserView> {
         val (user, token) = userSessionProvider.getCurrentUserSessionOrFail()
-        return user.toUserView(token).toUserWrapper()
+        return user.toUserViewShort(token).toUserWrapper()
     }
 
     @PutMapping("/user")
@@ -38,21 +41,22 @@ class UserController(private val userService: UserService, private val userSessi
         return userService.updateUser(request.content, userContext).toUserWrapper()
     }
 
+    @PutMapping("/admin/user")
+    suspend fun updateUserAdmin(@RequestBody @Valid request: UserWrapper<AdminUserRequest>): UserWrapper<UserView> {
+        val userContext = userSessionProvider.getCurrentUserSessionOrFail()
+        return userService.updateUserByAdmin(request.content, userContext).toUserWrapper()
+    }
+
     @GetMapping("/profiles/{username}")
-    suspend fun getProfile(@PathVariable username: String): ProfileWrapper {
+    suspend fun getProfile(@PathVariable username: String): UserWrapper<UserView> {
         val currentUser = userSessionProvider.getCurrentUserOrNull()
-        return userService.getProfile(username, currentUser).toProfileWrapper()
+        return userService.getProfile(username, currentUser).toUserWrapper()
     }
 
-    @PostMapping("/profiles/{username}/follow")
-    suspend fun follow(@PathVariable username: String): ProfileWrapper {
-        val currentUser = userSessionProvider.getCurrentUserOrFail()
-        return userService.follow(username, currentUser).toProfileWrapper()
+    @GetMapping("/profiles/admin/all")
+    suspend fun listProfiles(): ProfilesWrapper<UserView> {
+        return userService.getAllUsers().asFlow().toList().toProfileMapper()
     }
 
-    @DeleteMapping("/profiles/{username}/follow")
-    suspend fun unfollow(@PathVariable username: String): ProfileWrapper {
-        val currentUser = userSessionProvider.getCurrentUserOrFail()
-        return userService.unfollow(username, currentUser).toProfileWrapper()
-    }
+
 }

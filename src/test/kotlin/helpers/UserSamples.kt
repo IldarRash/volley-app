@@ -4,6 +4,8 @@ import com.realworld.spring.webflux.dto.User
 import com.realworld.spring.webflux.dto.request.UpdateUserRequest
 import com.realworld.spring.webflux.dto.request.UserAuthenticationRequest
 import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
+import com.realworld.spring.webflux.persistence.entity.Gender
+import com.realworld.spring.webflux.persistence.entity.Player
 import com.realworld.spring.webflux.service.user.PasswordService
 import java.util.*
 
@@ -19,6 +21,7 @@ object UserSamples {
         username = SAMPLE_USERNAME,
         email = SAMPLE_EMAIL,
         password = SAMPLE_PASSWORD,
+        gender = Gender.Male
     )
 
     fun sampleUserAuthenticationRequest() = UserAuthenticationRequest(
@@ -32,7 +35,9 @@ object UserSamples {
         email = SAMPLE_EMAIL,
         encodedPassword = passwordService.encodePassword(SAMPLE_PASSWORD),
         image = "test image url",
-        bio = "test bio"
+        bio = "test bio",
+        player = Player(),
+        gender = Gender.Male
     )
 
     fun sampleUser() = sampleUser(passwordService)

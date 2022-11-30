@@ -3,6 +3,7 @@ package com.realworld.spring.webflux.persistence.entity
 import com.realworld.spring.webflux.dto.User
 import org.apache.commons.lang3.StringUtils
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import reactor.core.publisher.Mono
@@ -16,9 +17,10 @@ enum class Gender {
     Male, Female, Other
 }
 
-@Table("app_user")
+@Document("app_user")
 data class UserEntity(
-        @Id val id: Long?,
+
+        @Id val id: UUID?,
         val username: String,
         val encodedPassword: String,
         val email: String,

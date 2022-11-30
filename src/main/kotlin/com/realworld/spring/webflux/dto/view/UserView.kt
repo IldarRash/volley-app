@@ -15,6 +15,7 @@ data class UserViewShort(
     val username: String,
     val bio: String?,
     val image: String?,
+    val player: PlayerView
 ) : UserView {
     override fun name(): String  = username
     override fun email(): String = email
@@ -26,7 +27,7 @@ data class UserViewPlayer(
         val username: String,
         val bio: String?,
         val image: String?,
-        val player: Player,
+        val player: PlayerView,
 ) : UserView {
     override fun name(): String  = username
     override fun email(): String = email
