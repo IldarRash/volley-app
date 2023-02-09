@@ -7,7 +7,7 @@ import com.realworld.spring.webflux.persistence.entity.Player
 import com.realworld.spring.webflux.persistence.entity.UserEntity
 import java.util.UUID
 
-class User(
+data class User(
     val id: UUID? = null,
     val username: String,
     val encodedPassword: String,

@@ -22,6 +22,6 @@ data class UserRegistrationRequest(
         email = email,
         username = username,
         gender = gender,
-        player =  Player(positions = positions)
+        player =  Player(username, 0, positions = positions, isToday = false)
     )
 }

@@ -5,7 +5,7 @@ import com.realworld.spring.webflux.dto.view.ShortPlayerView
 
 
 enum class Position {
-    OutsideHitter, OppositeHitter, MiddleBlocker, Setter, Libero
+    OutsideHitter, OppositeHitter, MiddleBlocker, Setter, Libero, NO
 }
 enum class Type {
     Main, Side
@@ -25,8 +25,11 @@ data class PlayerProps(
 )
 
 data class Player (
+        val username: String,
+        val score: Int,
         val positions: List<PlayerPosition> = listOf(),
-        val playerProps: List<PlayerProps> = listOf()
+        val playerProps: List<PlayerProps> = listOf(),
+        val isToday: Boolean
 ) {
     fun toShortView() = ShortPlayerView(this.positions)
 

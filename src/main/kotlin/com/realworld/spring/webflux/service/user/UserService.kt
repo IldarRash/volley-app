@@ -43,4 +43,10 @@ class UserService(
 
     suspend fun getAllUsers() =
             userDataService.getAllUsers().map { it.toUserViewPlayerFull() }
+
+    suspend fun addRole(user: User) {
+        userDataService.save(user.copy(
+
+        ))
+    }
 }

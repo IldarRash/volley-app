@@ -57,6 +57,9 @@ class UserController(private val userService: UserService, private val userSessi
     suspend fun listProfiles(): ProfilesWrapper<UserView> {
         return userService.getAllUsers().asFlow().toList().toProfileMapper()
     }
-
-
+    @GetMapping("/user/addRole")
+    suspend fun addRole(): UserWrapper<UserView> {
+        val currentUser = userSessionProvider.getCurrentUserOrNull()!!
+        return userService.addRole(currentUser).run { currentUser }.toUserViewPlayerFull().toUserWrapper()
+    }
 }

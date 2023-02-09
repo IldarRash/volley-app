@@ -57,6 +57,10 @@ class UserDataService(
         return toUser(userEntity = userEntity)
     }
 
+    suspend fun saveRoleToUser(user: User) {
+        userRepository.save(user.toUserEntity())
+    }
+
     suspend fun getAllUsers(): Flux<User> = userRepository.findAll().map { toUser(userEntity = it) }
 
     private fun toUser(userEntity: UserEntity): User {
