@@ -2,9 +2,7 @@ package com.realworld.spring.webflux.dto
 
 import com.realworld.spring.webflux.dto.view.UserViewPlayer
 import com.realworld.spring.webflux.dto.view.UserViewShort
-import com.realworld.spring.webflux.persistence.entity.Gender
-import com.realworld.spring.webflux.persistence.entity.Player
-import com.realworld.spring.webflux.persistence.entity.UserEntity
+import com.realworld.spring.webflux.persistence.entity.*
 import java.util.UUID
 
 data class User(
@@ -12,7 +10,9 @@ data class User(
     val username: String,
     val encodedPassword: String,
     val email: String,
-    val player: Player,
+    val score: Int = 0,
+    val positions: List<PlayerPosition> = listOf(),
+    val playerProps: List<PlayerProps> = listOf(),
     val gender: Gender,
     val bio: String? = null,
     val image: String? = null,
@@ -25,7 +25,9 @@ data class User(
         bio = this.bio,
         image = this.image,
         gender = gender,
-        player = player
+        positions = positions,
+        playerProps = playerProps,
+        score = score
     )
 
     fun toUserViewShort(token: String) = UserViewShort(
@@ -34,7 +36,7 @@ data class User(
         username = this.username,
         bio = this.bio,
         image = this.image,
-        player = this.player.toShortView()
+        positions = this.positions
     )
 
     fun toUserViewPlayerFull() = UserViewPlayer(
@@ -42,7 +44,7 @@ data class User(
             username = this.username,
             bio = this.bio,
             image = this.image,
-            player = this.player.toFullView()
+            positions = this.positions
     )
 
     override fun equals(other: Any?): Boolean {

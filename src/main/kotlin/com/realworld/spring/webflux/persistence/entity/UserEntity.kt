@@ -27,7 +27,9 @@ data class UserEntity(
         val bio: String? = null,
         val image: String? = null,
         val roles: List<Role> = listOf(Role.User),
-        val player: Player,
+        val score: Int,
+        val positions: List<PlayerPosition> = listOf(),
+        val playerProps: List<PlayerProps> = listOf(),
         val gender: Gender
 ) {
     fun toUser() = User(
@@ -38,6 +40,8 @@ data class UserEntity(
        bio = this.bio,
        image = this.image,
        gender = gender,
-       player = player
+       positions = positions,
+       playerProps = playerProps,
+       score = score
     )
 }

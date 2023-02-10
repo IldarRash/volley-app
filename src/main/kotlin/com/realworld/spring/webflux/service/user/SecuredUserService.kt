@@ -7,6 +7,8 @@ import com.realworld.spring.webflux.dto.view.UserView
 import com.realworld.spring.webflux.exceptions.InvalidRequestException
 import com.realworld.spring.webflux.dto.User
 import com.realworld.spring.webflux.dto.request.AdminUserRequest
+import com.realworld.spring.webflux.persistence.entity.PlayerPosition
+import com.realworld.spring.webflux.persistence.entity.PlayerProps
 import com.realworld.spring.webflux.persistence.repository.UserDataService
 import kotlinx.coroutines.reactor.awaitSingle
 import org.springframework.stereotype.Component
@@ -50,8 +52,8 @@ class SecuredUserService(
                 ?: user.encodedPassword,
             username = resolveUsername(user, request.username) ,
             email = resolveEmail(user, request.email),
-            player = user.player,
-            gender = user.gender
+            gender = user.gender,
+            positions = user.positions
         )
     }
 
@@ -63,7 +65,9 @@ class SecuredUserService(
                 encodedPassword = user.encodedPassword,
                 username = resolveUsername(user, request.username) ,
                 email = resolveEmail(user, request.email),
-                player = request.player,
+                score = request.score,
+                positions = request.positions,
+                playerProps = request.playerProps,
                 gender = request.gender
         )
     }
