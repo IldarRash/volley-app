@@ -44,7 +44,9 @@ data class User(
             username = this.username,
             bio = this.bio,
             image = this.image,
-            positions = this.positions
+            positions = this.positions,
+            score = this.score,
+            props = playerProps
     )
 
     override fun equals(other: Any?): Boolean {

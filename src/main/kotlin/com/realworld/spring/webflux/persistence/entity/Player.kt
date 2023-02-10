@@ -16,7 +16,7 @@ data class PlayerPosition(
         val position: Position
 )
 enum class Property {
-    Attack, Block, Serve, Set, Receive
+    Attack, Block, Serve, Set, Defend
 }
 data class PlayerProps(
         val score: Int = 0,

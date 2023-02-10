@@ -10,6 +10,7 @@ import com.realworld.spring.webflux.user.UserSessionProvider
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.reactive.asFlow
 import org.springframework.http.HttpStatus
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -42,18 +43,14 @@ class UserController(private val userService: UserService, private val userSessi
     }
 
     @PutMapping("/admin/user")
+    @PreAuthorize("hasAuthority('Admin')")
     suspend fun updateUserAdmin(@RequestBody @Valid request: UserWrapper<AdminUserRequest>): UserWrapper<UserView> {
         val userContext = userSessionProvider.getCurrentUserSessionOrFail()
         return userService.updateUserByAdmin(request.content, userContext).toUserWrapper()
     }
 
-    @GetMapping("/profiles/{username}")
-    suspend fun getProfile(@PathVariable username: String): UserWrapper<UserView> {
-        val currentUser = userSessionProvider.getCurrentUserOrNull()
-        return userService.getProfile(username, currentUser).toUserWrapper()
-    }
-
     @GetMapping("/profiles/admin/all")
+    @PreAuthorize("hasAuthority('Admin')")
     suspend fun listProfiles(): ProfilesWrapper<UserView> {
         return userService.getAllUsers().asFlow().toList().toProfileMapper()
     }

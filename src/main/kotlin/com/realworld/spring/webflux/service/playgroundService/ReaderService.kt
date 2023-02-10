@@ -1,8 +1,6 @@
 package com.realworld.spring.webflux.service
 
-import com.realworld.spring.webflux.dto.User
 import com.realworld.spring.webflux.persistence.entity.*
-import com.realworld.spring.webflux.service.user.UserService
 import java.io.File
 
 interface ReaderService {
@@ -56,7 +54,7 @@ class FileReaderService(val filePass: String): ReaderService {
             block to Property.Block,
             serve to Property.Serve,
             set to Property.Set,
-            defend to Property.Receive
+            defend to Property.Defend
         )
             .map { PlayerProps(it.key.toInt(), it.value) }
 }

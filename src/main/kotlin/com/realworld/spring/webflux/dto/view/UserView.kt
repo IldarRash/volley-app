@@ -1,10 +1,7 @@
 package com.realworld.spring.webflux.dto.view
 
 import com.realworld.spring.webflux.dto.User
-import com.realworld.spring.webflux.persistence.entity.Player
-import com.realworld.spring.webflux.persistence.entity.PlayerPosition
-import com.realworld.spring.webflux.persistence.entity.Position
-import com.realworld.spring.webflux.persistence.entity.UserEntity
+import com.realworld.spring.webflux.persistence.entity.*
 
 
 interface UserView {
@@ -29,7 +26,9 @@ data class UserViewPlayer(
         val username: String,
         val bio: String?,
         val image: String?,
-        val positions: List<PlayerPosition>
+        val positions: List<PlayerPosition>,
+        val score: Int,
+        val props: List<PlayerProps>
 ) : UserView {
     override fun name(): String  = username
     override fun email(): String = email
