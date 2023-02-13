@@ -1,12 +1,11 @@
 package helpers
 
-import com.realworld.spring.webflux.dto.User
-import com.realworld.spring.webflux.dto.request.UpdateUserRequest
-import com.realworld.spring.webflux.dto.request.UserAuthenticationRequest
-import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
-import com.realworld.spring.webflux.persistence.entity.Gender
-import com.realworld.spring.webflux.persistence.entity.Player
-import com.realworld.spring.webflux.service.user.PasswordService
+import com.courte.booking.dto.User
+import com.courte.booking.dto.request.UpdateUserRequest
+import com.courte.booking.dto.request.UserAuthenticationRequest
+import com.courte.booking.dto.request.UserRegistrationRequest
+import com.courte.booking.persistence.entity.Gender
+import com.courte.booking.service.user.PasswordService
 import java.util.*
 
 
@@ -30,13 +29,12 @@ object UserSamples {
     )
 
     fun sampleUser(passwordService: PasswordService) = User(
-        id = SAMPLE_USER_ID,
+        id = UUID.randomUUID(),
         username = SAMPLE_USERNAME,
         email = SAMPLE_EMAIL,
         encodedPassword = passwordService.encodePassword(SAMPLE_PASSWORD),
         image = "test image url",
         bio = "test bio",
-        player = Player(),
         gender = Gender.Male
     )
 

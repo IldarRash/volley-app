@@ -9,6 +9,7 @@ import com.courte.booking.dto.view.UserView
 import com.courte.booking.persistence.repository.UserDataService
 import com.realworld.spring.webflux.user.UserSession
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class UserService(
@@ -49,4 +50,6 @@ class UserService(
 
         ))
 
+    suspend fun getAllPayersByIds(players: List<UUID>) =
+        userDataService.getAllUsersByIds(players)
 }

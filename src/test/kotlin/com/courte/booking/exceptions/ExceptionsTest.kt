@@ -1,7 +1,6 @@
 package com.courte.booking.exceptions
 
-import com.realworld.spring.webflux.validation.LocaleConfigurer
-import com.realworld.spring.webflux.validation.NotBlankOrNull
+import com.courte.booking.validation.LocaleConfigurer
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration
@@ -82,7 +81,6 @@ internal class ExceptionsTest(
     }
 
     data class TestDto(
-        @field:NotBlankOrNull
         val name: String?,
         @field:Email @field:NotBlank
         val email: String,

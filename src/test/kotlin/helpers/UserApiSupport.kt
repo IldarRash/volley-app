@@ -1,11 +1,12 @@
 package helpers
 
+import com.courte.booking.dto.request.UpdateUserRequest
+import com.courte.booking.dto.request.UserAuthenticationRequest
+import com.courte.booking.dto.request.UserRegistrationRequest
+import com.courte.booking.dto.view.UserView
 import com.realworld.spring.webflux.api.UserWrapper
 import com.realworld.spring.webflux.api.toUserWrapper
-import com.realworld.spring.webflux.dto.request.UpdateUserRequest
-import com.realworld.spring.webflux.dto.request.UserAuthenticationRequest
-import com.realworld.spring.webflux.dto.request.UserRegistrationRequest
-import com.realworld.spring.webflux.dto.view.UserView
+
 import org.springframework.test.web.reactive.server.WebTestClient
 import org.springframework.test.web.reactive.server.expectBody
 

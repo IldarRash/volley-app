@@ -1,6 +1,6 @@
 package com.courte.booking.security
 
-import com.realworld.spring.webflux.exceptions.InvalidRequestException
+import com.courte.booking.exceptions.InvalidRequestException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test

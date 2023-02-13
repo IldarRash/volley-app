@@ -1,7 +1,7 @@
 package com.courte.booking.api
 
-import com.realworld.spring.webflux.persistence.repository.UserDataService
-import com.realworld.spring.webflux.persistence.repository.UserRepository
+import com.courte.booking.persistence.repository.UserDataService
+import com.courte.booking.persistence.repository.UserRepository
 import helpers.UserApiSupport
 import helpers.UserSamples
 import kotlinx.coroutines.runBlocking

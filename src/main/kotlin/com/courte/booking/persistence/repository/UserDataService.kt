@@ -63,6 +63,8 @@ class UserDataService(
 
     suspend fun getAllUsers(): Flux<User> = userRepository.findAll().map { toUser(userEntity = it) }
 
+    suspend fun getAllUsersByIds(players: List<UUID>): Flux<User> = userRepository.findAllById(players).map { toUser(userEntity = it) }
+
     private fun toUser(userEntity: UserEntity): User {
         return userEntity.toUser()
     }

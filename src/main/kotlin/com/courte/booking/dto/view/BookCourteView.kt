@@ -19,6 +19,7 @@ interface BookCourtView {
 }
 
 data class BookCourtViewShort(
+    val id: UUID,
     val startAt: Instant,
     val limit: Int,
     val description: String,
@@ -39,6 +40,7 @@ data class BookCourtViewShort(
 }
 
 data class BookCourtFullView(
+    val id: UUID,
     val startAt: Instant,
     val limit: Int,
     val description: String,

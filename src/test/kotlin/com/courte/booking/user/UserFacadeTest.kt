@@ -1,13 +1,14 @@
 package com.courte.booking.user
 
-import com.realworld.spring.webflux.exceptions.InvalidRequestException
-import com.realworld.spring.webflux.dto.User
-import com.realworld.spring.webflux.persistence.repository.UserDataService
-import com.realworld.spring.webflux.persistence.repository.UserRepository
-import com.realworld.spring.webflux.security.JwtSigner
-import com.realworld.spring.webflux.service.user.PasswordService
-import com.realworld.spring.webflux.service.user.SecuredUserService
-import com.realworld.spring.webflux.service.user.UserService
+import com.courte.booking.dto.User
+import com.courte.booking.exceptions.InvalidRequestException
+import com.courte.booking.persistence.repository.UserDataService
+import com.courte.booking.persistence.repository.UserRepository
+import com.courte.booking.security.JwtSigner
+import com.courte.booking.service.user.PasswordService
+import com.courte.booking.service.user.SecuredUserService
+import com.courte.booking.service.user.UserService
+import com.realworld.spring.webflux.user.UserSession
 import helpers.UserSamples
 import helpers.coCatchThrowable
 import io.mockk.every
@@ -16,6 +17,7 @@ import kotlinx.coroutines.test.runTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import reactor.kotlin.core.publisher.toMono
+import java.util.UUID
 
 class UserFacadeTest {
     companion object {
@@ -87,7 +89,7 @@ class UserFacadeTest {
         every { userRepository.existsByEmail(any()) } returns true.toMono()
         every { userRepository.existsByUsername(any()) } returns false.toMono()
         val user = UserSamples.sampleUser()
-        every { userRepository.findById(any<Long>()) } returns user.toUserEntity().toMono()
+        every { userRepository.findById(any<UUID>()) } returns user.toUserEntity().toMono()
 
         val updateRequest = UserSamples.sampleUpdateUserRequest()
         val throwable = coCatchThrowable { userService.updateUser(updateRequest, UserSession(user, "token")) }
@@ -102,7 +104,7 @@ class UserFacadeTest {
         every { userRepository.existsByEmail(any()) } returns false.toMono()
         every { userRepository.existsByUsername(any()) } returns true.toMono()
         val user = UserSamples.sampleUser()
-        every { userRepository.findById(any<Long>()) } returns user.toUserEntity().toMono()
+        every { userRepository.findById(any<UUID>()) } returns user.toUserEntity().toMono()
 
         val updateRequest = UserSamples.sampleUpdateUserRequest()
         val throwable = coCatchThrowable { userService.updateUser(updateRequest, UserSession(user, "token")) }

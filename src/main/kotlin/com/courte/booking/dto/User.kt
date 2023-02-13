@@ -2,10 +2,7 @@ package com.courte.booking.dto
 
 import com.courte.booking.dto.view.UserViewPlayer
 import com.courte.booking.dto.view.UserViewShort
-import com.courte.booking.persistence.entity.Gender
-import com.courte.booking.persistence.entity.PlayerPosition
-import com.courte.booking.persistence.entity.PlayerProps
-import com.courte.booking.persistence.entity.UserEntity
+import com.courte.booking.persistence.entity.*
 import java.util.UUID
 
 data class User(
@@ -50,6 +47,14 @@ data class User(
             positions = this.positions,
             score = this.score,
             props = playerProps
+    )
+
+    fun toPlayer() = Player(
+        username,
+        score,
+        positions,
+        playerProps,
+        false
     )
 
     override fun equals(other: Any?): Boolean {
