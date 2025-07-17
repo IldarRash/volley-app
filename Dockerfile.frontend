@@ -1,0 +1,27 @@
+# Dockerfile for Angular Frontend
+# This is a placeholder file. It will be updated when the Angular application is developed.
+
+# Stage 1: Build the application
+FROM node:20 as builder
+
+# Set the working directory
+WORKDIR /usr/src/app
+
+# Copy the package.json and package-lock.json files
+COPY frontend/package*.json ./
+
+# Install the dependencies
+RUN npm install
+
+# Copy the application source
+COPY frontend/. .
+
+# Build the application
+RUN npm run build --prod
+
+# Stage 2: Serve the application
+FROM nginx:alpine
+COPY --from=builder /usr/src/app/dist/volley-app /usr/share/nginx/html
+
+# Expose the port
+EXPOSE 80 
