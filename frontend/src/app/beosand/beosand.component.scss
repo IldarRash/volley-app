@@ -1,55 +1,52 @@
-:host {
-  display: block;
-  padding: 24px;
-  background-color: #f5f5dc; // Beige background
-  font-family: 'Montserrat', sans-serif;
-}
+@import '../../themes.scss';
 
-.container {
+.page-container {
   display: flex;
-  gap: 24px;
-  margin-top: 24px;
+  height: calc(100vh - 120px);
 }
 
-.locations-container {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
+.locations-list {
+  width: 30%;
+  overflow-y: auto;
+  padding: $spacing-unit * 2;
+  background-color: $surface-color;
+  border-right: 1px solid $border-color;
 
-.location-card {
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  width: 300px;
-  transition: transform 0.3s;
-  cursor: pointer;
+  .location-card {
+    display: flex;
+    margin-bottom: $spacing-unit * 2;
+    padding: $spacing-unit;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow;
+    cursor: pointer;
+    transition: box-shadow 0.3s;
 
-  &:hover {
-    transform: translateY(-5px);
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: $border-radius;
+      margin-right: $spacing-unit * 2;
+    }
+
+    .location-info {
+      h3 {
+        margin: 0 0 $spacing-unit 0;
+      }
+      p {
+        margin: 0;
+        color: $text-secondary-color;
+      }
+    }
   }
-
-  .card-header {
-    background-color: #00ced1; // Turquoise
-    color: white;
-    padding: 16px;
-    text-align: center;
-    font-size: 1.5em;
-  }
-}
-
-.events-container {
-  flex-grow: 1;
-}
-
-.content {
-  display: flex;
-  height: calc(100vh - 150px);
 }
 
 .map-container {
-  flex: 2;
+  width: 70%;
   height: 100%;
 }
 

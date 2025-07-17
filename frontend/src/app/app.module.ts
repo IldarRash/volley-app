@@ -66,7 +66,6 @@ import { SubscriptionsComponent } from './subscriptions/subscriptions.component'
     MatSelectModule,
     MatTableModule,
     MatTabsModule,
-    SocketIoModule.forRoot(config)
   ],
   providers: [],
   bootstrap: [AppComponent]

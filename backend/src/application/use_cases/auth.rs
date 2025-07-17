@@ -1,6 +1,6 @@
 use crate::domain::{User, validators};
 use crate::infrastructure::persistence::repositories::user_repository;
-use mongodb::Database;
+use sqlx::PgConnection;
 use bcrypt::{hash, verify, DEFAULT_COST};
 use jsonwebtoken::{encode, decode, Header, Validation, EncodingKey, DecodingKey};
 use serde::{Deserialize, Serialize};
@@ -9,7 +9,7 @@ use chrono::{Utc, Duration};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
     pub sub: String, // username
-    pub user_id: String, // ObjectId as string
+    pub user_id: String, // Uuid as string
     pub role: String,
     pub exp: usize,
 }
@@ -17,7 +17,7 @@ pub struct Claims {
 const SECRET_KEY: &[u8] = b"your_super_secret_key"; // TODO: Move to config
 
 pub async fn register_user(
-    db: &Database,
+    conn: &mut PgConnection,
     username: &str,
     password: &str,
 ) -> Result<User, String> {
@@ -26,7 +26,7 @@ pub async fn register_user(
     validators::validate_password(password).map_err(|e| e.to_string())?;
 
     // Check if user already exists
-    if let Ok(Some(_)) = user_repository::find_by_username(db, username).await {
+    if let Ok(Some(_)) = user_repository::find_by_username(conn, username).await {
         return Err("Username already exists".to_string());
     }
 
@@ -35,29 +35,24 @@ pub async fn register_user(
         .map_err(|_| "Failed to hash password")?;
 
     // Create new user
-    let mut user = User::new(username.to_string(), password_hash);
+    let user = User::new(username.to_string(), password_hash);
 
-    // Save to database
-    let insert_result = user_repository::create(db, &user)
+    // Save to database and get the created user back
+    let created_user = user_repository::create(conn, &user)
         .await
         .map_err(|e| format!("Failed to create user: {}", e))?;
 
-    // Set the generated ID
-    if let Some(inserted_id) = insert_result.inserted_id.as_object_id() {
-        user.id = Some(inserted_id);
-    }
-
     // Return user (password_hash won't be serialized)
-    Ok(user)
+    Ok(created_user)
 }
 
 pub async fn login_user(
-    db: &Database,
+    conn: &mut PgConnection,
     username: &str,
     password: &str,
 ) -> Result<(User, String), String> {
     // Find user
-    let user = user_repository::find_by_username(db, username)
+    let user = user_repository::find_by_username(conn, username)
         .await
         .map_err(|_| "Database error")?
         .ok_or("Invalid username or password")?;
@@ -68,9 +63,7 @@ pub async fn login_user(
     }
 
     // Generate JWT token
-    let user_id = user.id.as_ref()
-        .ok_or("User ID not found")?
-        .to_string();
+    let user_id = user.id.to_string();
 
     let claims = Claims {
         sub: user.username.clone(),

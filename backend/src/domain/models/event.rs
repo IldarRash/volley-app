@@ -1,38 +1,51 @@
-use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
-use super::{EventType, EventLevel, ParticipantStatus, PaymentStatus};
+use super::{EventType, EventLevel};
+use crate::domain::models::{ParticipantStatus, PaymentStatus};
+use sqlx::types::uuid::Uuid;
 
 /// Participant in an event
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, sqlx::FromRow)]
 pub struct Participant {
-    pub user_id: ObjectId,
+    pub user_id: Uuid,
+    #[sqlx(try_from = "String")]
     pub status: ParticipantStatus,
+    #[sqlx(try_from = "String")]
     pub payment: PaymentStatus,
 }
 
 /// Domain model for Event
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, sqlx::FromRow)]
 pub struct Event {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<ObjectId>,
-    #[serde(rename = "type")]
+    pub id: Uuid,
+    pub name: String,
+    pub description: Option<String>,
+    #[sqlx(try_from = "String")]
     pub event_type: EventType,
-    pub location_id: ObjectId,
+    pub location_id: Uuid,
     pub datetime: DateTime<Utc>,
-    pub level: Option<EventLevel>,
-    pub price: Option<u32>,
-    pub trainer_id: Option<ObjectId>,
+    pub level: Option<String>,
+    pub price: Option<i32>,
+    pub trainer_id: Option<Uuid>,
     pub confirmed: bool,
+    #[sqlx(json)]
     #[serde(default)]
     pub participants: Vec<Participant>,
-    pub max_participants: Option<u32>,
+    pub max_participants: Option<i32>,
 }
 
 impl Event {
-    pub fn new(event_type: EventType, location_id: ObjectId, datetime: DateTime<Utc>) -> Self {
+    pub fn new(
+        name: String,
+        description: Option<String>,
+        event_type: EventType,
+        location_id: Uuid,
+        datetime: DateTime<Utc>,
+    ) -> Self {
         Self {
-            id: None,
+            id: Uuid::new_v4(),
+            name,
+            description,
             event_type,
             location_id,
             datetime,
@@ -53,7 +66,7 @@ impl Event {
         }
     }
 
-    pub fn add_participant(&mut self, user_id: ObjectId) -> Result<(), &'static str> {
+    pub fn add_participant(&mut self, user_id: Uuid) -> Result<(), &'static str> {
         if self.is_full() {
             return Err("Event is full");
         }

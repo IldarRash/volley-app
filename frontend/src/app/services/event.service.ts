@@ -16,12 +16,15 @@ export class EventService {
     private http: HttpClient,
     private websocketService: WebsocketService
   ) {
-    this.websocketService.getMessage('event_updated').subscribe((event: Event) => {
-      const currentEvents = this.events$.getValue();
-      const index = currentEvents.findIndex(e => e.id === event.id);
-      if (index > -1) {
-        currentEvents[index] = event;
-        this.events$.next([...currentEvents]);
+    this.websocketService.getMessage().subscribe((message: any) => {
+      if (message.type === 'event_updated') {
+        const event: Event = message.payload;
+        const currentEvents = this.events$.getValue();
+        const index = currentEvents.findIndex(e => e.id === event.id);
+        if (index > -1) {
+          currentEvents[index] = event;
+          this.events$.next([...currentEvents]);
+        }
       }
     });
   }

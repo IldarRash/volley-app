@@ -7,5 +7,6 @@ pub use models::{
     location::Location,
     event::{Event, Participant},
     event_timer::EventTimer,
-    ParticipantStatus, PaymentStatus,
-}; 
+    subscription::Subscription,
+};
+pub use models::{UserRole, EventType, EventLevel, ParticipantStatus, PaymentStatus}; 

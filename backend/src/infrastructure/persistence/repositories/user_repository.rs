@@ -1,117 +1,146 @@
-use crate::domain::User;
-use mongodb::{bson::{doc, oid::ObjectId}, error::Error, results::{InsertOneResult, UpdateResult, DeleteResult}, Database};
-use serde::{Serialize, Deserialize};
-use futures::stream::TryStreamExt;
+use sqlx::{types::uuid::Uuid, PgConnection, Row, types::Json};
+use crate::domain::{User, UserRole, Subscription};
 
-const COLLECTION_NAME: &str = "users";
+pub async fn create(conn: &mut PgConnection, user: &User) -> Result<User, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        INSERT INTO users (id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed
+        "#
+    )
+    .bind(&user.id)
+    .bind(&user.username)
+    .bind(&user.password_hash)
+    .bind(&user.role)
+    .bind(&user.rating)
+    .bind(&user.telegram_id)
+    .bind(&user.instagram_link)
+    .bind(&user.image_url)
+    .bind(Json(&user.subscriptions))
+    .bind(&user.subscribed)
+    .fetch_one(conn)
+    .await?;
 
-pub struct UserRepository;
-
-#[derive(Debug, Serialize, Deserialize)]
-struct UserDocument {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<ObjectId>,
-    pub username: String,
-    pub password_hash: String,
-    pub role: String,
-    pub rating: f64,
-    pub telegram_id: Option<String>,
-    pub instagram_link: Option<String>,
-    pub image_url: Option<String>,
-    pub subscriptions: Vec<serde_json::Value>,
-    pub subscribed: bool,
+    Ok(User {
+        id: row.get("id"),
+        username: row.get("username"),
+        password_hash: row.get("password_hash"),
+        role: row.get("role"),
+        rating: row.get("rating"),
+        telegram_id: row.get("telegram_id"),
+        instagram_link: row.get("instagram_link"),
+        image_url: row.get("image_url"),
+        subscriptions: row.get::<Json<Vec<Subscription>>, _>("subscriptions").0,
+        subscribed: row.get("subscribed"),
+    })
 }
 
-impl From<&User> for UserDocument {
-    fn from(user: &User) -> Self {
-        UserDocument {
-            id: user.id,
-            username: user.username.clone(),
-            password_hash: user.password_hash.clone(),
-            role: serde_json::to_string(&user.role).unwrap().trim_matches('"').to_string(),
-            rating: user.rating,
-            telegram_id: user.telegram_id.clone(),
-            instagram_link: user.instagram_link.clone(),
-            image_url: user.image_url.clone(),
-            subscriptions: user.subscriptions.iter().map(|s| serde_json::to_value(s).unwrap()).collect(),
-            subscribed: user.subscribed,
-        }
-    }
+pub async fn find_by_username(conn: &mut PgConnection, username: &str) -> Result<Option<User>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"SELECT id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed FROM users WHERE username = $1"#
+    )
+    .bind(username)
+    .fetch_optional(conn)
+    .await?;
+
+    Ok(row.map(|row| User {
+        id: row.get("id"),
+        username: row.get("username"),
+        password_hash: row.get("password_hash"),
+        role: row.get("role"),
+        rating: row.get("rating"),
+        telegram_id: row.get("telegram_id"),
+        instagram_link: row.get("instagram_link"),
+        image_url: row.get("image_url"),
+        subscriptions: row.get::<Json<Vec<Subscription>>, _>("subscriptions").0,
+        subscribed: row.get("subscribed"),
+    }))
 }
 
-impl From<UserDocument> for User {
-    fn from(doc: UserDocument) -> Self {
-        User {
-            id: doc.id,
-            username: doc.username,
-            password_hash: doc.password_hash,
-            role: serde_json::from_str(&format!("\"{}\"", doc.role)).unwrap(),
-            rating: doc.rating,
-            telegram_id: doc.telegram_id,
-            instagram_link: doc.instagram_link,
-            image_url: doc.image_url,
-            subscriptions: doc.subscriptions.into_iter().map(|s| serde_json::from_value(s).unwrap()).collect(),
-            subscribed: doc.subscribed,
-        }
-    }
+pub async fn find_by_id(conn: &mut PgConnection, id: &Uuid) -> Result<Option<User>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"SELECT id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed FROM users WHERE id = $1"#
+    )
+    .bind(id)
+    .fetch_optional(conn)
+    .await?;
+
+    Ok(row.map(|row| User {
+        id: row.get("id"),
+        username: row.get("username"),
+        password_hash: row.get("password_hash"),
+        role: row.get("role"),
+        rating: row.get("rating"),
+        telegram_id: row.get("telegram_id"),
+        instagram_link: row.get("instagram_link"),
+        image_url: row.get("image_url"),
+        subscriptions: row.get::<Json<Vec<Subscription>>, _>("subscriptions").0,
+        subscribed: row.get("subscribed"),
+    }))
 }
 
-pub async fn create(db: &Database, user: &User) -> Result<InsertOneResult, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let doc = UserDocument::from(user);
-    collection.insert_one(doc, None).await
+pub async fn find_all(conn: &mut PgConnection) -> Result<Vec<User>, sqlx::Error> {
+    let rows = sqlx::query(
+        r#"SELECT id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed FROM users"#
+    )
+    .fetch_all(conn)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| User {
+        id: row.get("id"),
+        username: row.get("username"),
+        password_hash: row.get("password_hash"),
+        role: row.get("role"),
+        rating: row.get("rating"),
+        telegram_id: row.get("telegram_id"),
+        instagram_link: row.get("instagram_link"),
+        image_url: row.get("image_url"),
+        subscriptions: row.get::<Json<Vec<Subscription>>, _>("subscriptions").0,
+        subscribed: row.get("subscribed"),
+    }).collect())
 }
 
-pub async fn find_by_username(db: &Database, username: &str) -> Result<Option<User>, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let doc = collection.find_one(doc! { "username": username }, None).await?;
-    Ok(doc.map(User::from))
+pub async fn update(conn: &mut PgConnection, id: &Uuid, user: &User) -> Result<User, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE users
+        SET username = $2, password_hash = $3, role = $4, rating = $5, telegram_id = $6, instagram_link = $7, image_url = $8, subscriptions = $9, subscribed = $10
+        WHERE id = $1
+        RETURNING id, username, password_hash, role, rating, telegram_id, instagram_link, image_url, subscriptions, subscribed
+        "#
+    )
+    .bind(id)
+    .bind(&user.username)
+    .bind(&user.password_hash)
+    .bind(&user.role)
+    .bind(&user.rating)
+    .bind(&user.telegram_id)
+    .bind(&user.instagram_link)
+    .bind(&user.image_url)
+    .bind(Json(&user.subscriptions))
+    .bind(&user.subscribed)
+    .fetch_one(conn)
+    .await?;
+
+    Ok(User {
+        id: row.get("id"),
+        username: row.get("username"),
+        password_hash: row.get("password_hash"),
+        role: row.get("role"),
+        rating: row.get("rating"),
+        telegram_id: row.get("telegram_id"),
+        instagram_link: row.get("instagram_link"),
+        image_url: row.get("image_url"),
+        subscriptions: row.get::<Json<Vec<Subscription>>, _>("subscriptions").0,
+        subscribed: row.get("subscribed"),
+    })
 }
 
-pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Option<User>, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let doc = collection.find_one(doc! { "_id": id }, None).await?;
-    Ok(doc.map(User::from))
-}
-
-pub async fn find_by_telegram_id(db: &Database, telegram_id: &str) -> Result<Option<User>, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let doc = collection.find_one(doc! { "telegram_id": telegram_id }, None).await?;
-    Ok(doc.map(User::from))
-}
-
-pub async fn find_all(db: &Database) -> Result<Vec<User>, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let mut cursor = collection.find(doc! {}, None).await?;
-    let mut users = Vec::new();
-    while let Some(doc) = cursor.try_next().await? {
-        users.push(User::from(doc));
-    }
-    Ok(users)
-}
-
-pub async fn update(db: &Database, id: &ObjectId, user: &User) -> Result<UpdateResult, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let doc = UserDocument::from(user);
-    collection.replace_one(doc! { "_id": id }, doc, None).await
-}
-
-pub async fn update_password(db: &Database, id: &ObjectId, password_hash: &str) -> Result<(), Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    let filter = doc! { "_id": id };
-    let update = doc! { "$set": { "password_hash": password_hash } };
-    
-    collection.update_one(filter, update, None).await?;
-    Ok(())
-}
-
-pub async fn delete(db: &Database, id: &ObjectId) -> Result<DeleteResult, Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    collection.delete_one(doc! { "_id": id }, None).await
-}
-
-pub async fn clear(db: &Database) -> Result<(), Error> {
-    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
-    collection.delete_many(doc! {}, None).await?;
+pub async fn delete(conn: &mut PgConnection, id: &Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM users WHERE id = $1")
+        .bind(id)
+        .execute(conn)
+        .await?;
     Ok(())
 } 

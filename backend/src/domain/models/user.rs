@@ -1,20 +1,21 @@
-use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
-pub use super::{UserRole, subscription::Subscription};
+use sqlx::types::uuid::Uuid;
+pub use super::{subscription::Subscription, UserRole};
 
 /// Domain model for User
-#[derive(Debug, Serialize, Deserialize, Default)]
+#[derive(Debug, Serialize, Deserialize, Default, sqlx::FromRow)]
 pub struct User {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<ObjectId>,
+    pub id: Uuid,
     pub username: String,
     #[serde(skip_serializing, default)]
     pub password_hash: String,
+    #[sqlx(try_from = "String")]
     pub role: UserRole,
     pub rating: f64,
     pub telegram_id: Option<String>,
     pub instagram_link: Option<String>,
     pub image_url: Option<String>,
+    #[sqlx(json)]
     #[serde(default)]
     pub subscriptions: Vec<Subscription>,
     pub subscribed: bool,
@@ -23,7 +24,7 @@ pub struct User {
 impl User {
     pub fn new(username: String, password_hash: String) -> Self {
         Self {
-            id: None,
+            id: Uuid::new_v4(),
             username,
             password_hash,
             role: UserRole::User,

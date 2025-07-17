@@ -1,6 +1,9 @@
 export interface Location {
-  _id: any;
+  id: string;
   name: string;
-  coordinates: number[];
+  address: string;
+  coordinates: [number, number];
+  type: 'classic' | 'beach';
   confirmed: boolean;
+  image_url?: string;
 } 

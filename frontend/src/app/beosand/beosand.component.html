@@ -1,24 +1,12 @@
-<h2>Свободные слоты на неделю!</h2>
-
-<div class="container">
-  <div class="map-container">
-    <div class="map" #map></div>
-  </div>
-  <div class="sidebar">
-    <h2>Locations</h2>
-    <ul>
-      <li *ngFor="let location of locations" (click)="onLocationClick(location)">
-        {{ location.name }}
-      </li>
-    </ul>
-  </div>
-  <div class="events-container">
-    <div *ngFor="let event of events$ | async" class="event-card">
-      <h3>{{ event.event_type }}</h3>
-      <p>Date: {{ event.datetime | date:'short' }}</p>
-      <p>Location: {{ event.location_id }}</p>
-      <p>Participants: {{ event.participants.length }} / {{ event.max_participants }}</p>
-      <button>Join</button>
+<div class="page-container">
+  <div class="locations-list">
+    <div *ngFor="let location of locations" class="location-card">
+      <img [src]="location.image_url || 'assets/default-location.png'" alt="{{ location.name }}">
+      <div class="location-info">
+        <h3>{{ location.name }}</h3>
+        <p>{{ location.address }}</p>
+      </div>
     </div>
   </div>
+  <div id="map" class="map-container"></div>
 </div> 

@@ -2,107 +2,61 @@
 extern crate rocket;
 
 mod domain;
-mod application;
 mod infrastructure;
 mod presentation;
+mod application;
 
-use rocket::fairing::AdHoc;
-use rocket::fs::FileServer;
-use rocket_db_pools::{Database, Connection};
-
-use infrastructure::external::telegram;
-use infrastructure::persistence::repositories::location_repository;
-use presentation::api::{admin, auth, events, files, locations, users};
+use rocket_db_pools::{Database};
+use presentation::api::{
+    users::{get_me, update_me},
+    locations::{get_locations, get_all_locations},
+    events::{get_events_by_location, get_upcoming_events, join_event, leave_event},
+    auth::{login, register},
+    admin::{
+        get_users, set_user_role,
+        create_location, update_location, delete_location, confirm_location,
+        create_event, update_event, delete_event, confirm_event,
+        create_event_timer, update_event_timer, delete_event_timer,
+        import_users_csv, import_users_json
+    },
+    files::upload
+};
 use presentation::middleware::cors::CORS;
 
-use domain::Location;
-
 #[derive(Database)]
-#[database("mongodb_volley")]
-pub struct Db(mongodb::Client);
+#[database("postgres")]
+pub struct AppDatabase(rocket_db_pools::sqlx::PgPool);
 
-#[get("/")]
-fn index() -> &'static str {
-    "Beosend Volleyball API"
-}
-
-#[get("/health")]
-fn health() -> &'static str {
-    "OK"
-}
-
-async fn seed_data(db: mongodb::Database) {
-    println!("Seeding data...");
-    
-    let location = Location::new(
-        "Ada Ciganlija".to_string(),
-        [44.788, 20.415]
-    );
-
-    if let Err(e) = location_repository::create(&db, &location).await {
-        eprintln!("Failed to seed location: {}", e);
-    }
-
-    println!("Seeding complete.");
+#[options("/<_..>")]
+fn options() -> &'static str {
+    ""
 }
 
 #[launch]
 fn rocket() -> _ {
+    use tracing_subscriber::{Registry, prelude::*};
+    use tracing_subscriber::fmt::{self};
+
+    let subscriber = Registry::default()
+        .with(fmt::layer().event_format(fmt::format::Format::default().json()));
+    tracing::subscriber::set_global_default(subscriber).expect("Failed to set global default subscriber");
+
     rocket::build()
-        .attach(Db::init())
+        .attach(AppDatabase::init())
         .attach(CORS)
-        .attach(AdHoc::on_liftoff("Seed Data", |rocket| {
-            Box::pin(async move {
-                let db_conn = Db::fetch(rocket).unwrap();
-                let db = &db_conn.database("volleyApp");
-                seed_data(db.clone()).await;
-            })
-        }))
-        .attach(AdHoc::on_liftoff("Telegram Bot", |_| {
-            Box::pin(async move {
-                tokio::spawn(telegram::run());
-            })
-        }))
-        .mount("/", routes![
-            index,
-            health
+        .mount("/api/auth", routes![login, register])
+        .mount("/api", routes![
+            login, register,
+            get_me, update_me,
+            get_locations, get_all_locations,
+            get_events_by_location, get_upcoming_events, join_event, leave_event,
+            upload
         ])
-        .mount("/auth", routes![
-            auth::register,
-            auth::login,
+        .mount("/api/admin", routes![
+            get_users, set_user_role,
+            create_location, update_location, delete_location, confirm_location,
+            create_event, update_event, delete_event, confirm_event,
+            create_event_timer, update_event_timer, delete_event_timer,
+            import_users_csv, import_users_json
         ])
-        .mount("/admin", routes![
-            admin::import_users_csv,
-            admin::get_users,
-            admin::set_user_role,
-            admin::create_location,
-            admin::update_location,
-            admin::delete_location,
-            admin::confirm_location,
-            admin::create_event,
-            admin::update_event,
-            admin::delete_event,
-            admin::confirm_event,
-            admin::create_event_timer,
-            admin::update_event_timer,
-            admin::delete_event_timer,
-        ])
-        .mount("/users", routes![
-            users::get_me,
-            users::update_me,
-        ])
-        .mount("/files", routes![
-            files::upload,
-        ])
-        .mount("/locations", routes![
-            locations::get_locations,
-            locations::get_all_locations,
-        ])
-        .mount("/events", routes![
-            events::get_events_by_location,
-            events::get_upcoming_events,
-            events::join_event,
-            events::leave_event,
-        ])
-        .mount("/static", FileServer::from("static"))
 }

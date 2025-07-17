@@ -1,21 +1,28 @@
-use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
+use sqlx::types::uuid::Uuid;
+
+/// Represents geographical coordinates
+#[derive(Debug, Serialize, Deserialize, Clone, Default, sqlx::FromRow)]
+pub struct Coordinates {
+    pub lat: f64,
+    pub lon: f64,
+}
 
 /// Represents a geographical location
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default, sqlx::FromRow)]
 pub struct Location {
-    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
-    pub id: Option<ObjectId>,
+    pub id: Uuid,
     pub name: String,
-    pub coordinates: [f64; 2],
+    #[sqlx(json)]
+    pub coordinates: Coordinates,
     pub confirmed: bool,
     pub image_url: Option<String>,
 }
 
 impl Location {
-    pub fn new(name: String, coordinates: [f64; 2]) -> Self {
+    pub fn new(name: String, coordinates: Coordinates) -> Self {
         Self {
-            id: None,
+            id: Uuid::new_v4(),
             name,
             coordinates,
             confirmed: false,

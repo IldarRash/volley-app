@@ -1,118 +1,278 @@
-use crate::domain::{Event, Participant};
-use futures::stream::TryStreamExt;
-use mongodb::{bson::{doc, oid::ObjectId, DateTime as BsonDateTime}, error::Error, results::{InsertOneResult, UpdateResult, DeleteResult}, Database};
-use chrono::Utc;
+use sqlx::{types::uuid::Uuid, PgConnection, types::chrono::Utc, types::Json, Row};
+use crate::domain::{Event, Participant, ParticipantStatus, PaymentStatus, EventType};
 
-const COLLECTION_NAME: &str = "events";
+pub async fn create(conn: &mut PgConnection, event: &Event) -> Result<Event, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        INSERT INTO events (id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        RETURNING id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id
+        "#
+    )
+    .bind(&event.id)
+    .bind(&event.name)
+    .bind(&event.description)
+    .bind(&event.datetime)
+    .bind(&event.location_id)
+    .bind(&event.event_type)
+    .bind(&event.max_participants)
+    .bind(Json(&event.participants))
+    .bind(&event.level)
+    .bind(&event.confirmed)
+    .bind(&event.price)
+    .bind(&event.trainer_id)
+    .fetch_one(conn)
+    .await?;
 
-pub async fn create(db: &Database, event: &Event) -> Result<InsertOneResult, Error> {
-    db.collection::<Event>(COLLECTION_NAME).insert_one(event, None).await
+    Ok(Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
+    })
 }
 
-pub async fn find_all(db: &Database) -> Result<Vec<Event>, Error> {
-    let mut cursor = db.collection::<Event>(COLLECTION_NAME).find(doc! {}, None).await?;
-    let mut events = Vec::new();
-    while let Some(event) = cursor.try_next().await? {
-        events.push(event);
-    }
-    Ok(events)
+pub async fn find_all(conn: &mut PgConnection) -> Result<Vec<Event>, sqlx::Error> {
+    let rows = sqlx::query(
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events"#
+    )
+    .fetch_all(conn)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    }).collect())
 }
 
-pub async fn find_by_location_id(db: &Database, location_id: &ObjectId) -> Result<Vec<Event>, Error> {
-    let filter = doc! { "location_id": location_id };
-    let mut cursor = db.collection::<Event>(COLLECTION_NAME).find(filter, None).await?;
-    let mut events = Vec::new();
-    while let Some(event) = cursor.try_next().await? {
-        events.push(event);
-    }
-    Ok(events)
+pub async fn find_by_location_id(conn: &mut PgConnection, location_id: &Uuid) -> Result<Vec<Event>, sqlx::Error> {
+    let rows = sqlx::query(
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events WHERE location_id = $1"#
+    )
+    .bind(location_id)
+    .fetch_all(conn)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    }).collect())
 }
 
-pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Option<Event>, Error> {
-    let doc = db.collection::<Event>(COLLECTION_NAME).find_one(doc! { "_id": id }, None).await?;
-    Ok(doc.map(Event::from))
+pub async fn find_by_id(conn: &mut PgConnection, id: &Uuid) -> Result<Option<Event>, sqlx::Error> {
+    let row = sqlx::query(
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events WHERE id = $1"#
+    )
+    .bind(id)
+    .fetch_optional(conn)
+    .await?;
+
+    Ok(row.map(|row| Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    }))
 }
 
-pub async fn find_by_user(db: &Database, user_id: &ObjectId) -> Result<Vec<Event>, Error> {
-    let collection = db.collection::<Event>(COLLECTION_NAME);
-    let mut cursor = collection.find(doc! { "participants": user_id }, None).await?;
-    let mut events = Vec::new();
-    while let Some(doc) = cursor.try_next().await? {
-        events.push(Event::from(doc));
-    }
-    Ok(events)
+pub async fn find_by_user(conn: &mut PgConnection, user_id: &Uuid) -> Result<Vec<Event>, sqlx::Error> {
+    let rows = sqlx::query(
+        r#"
+        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price
+        FROM events, jsonb_to_recordset(participants) as p(user_id uuid)
+        WHERE p.user_id = $1
+        "#
+    )
+    .bind(user_id)
+    .fetch_all(conn)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    }).collect())
 }
 
-pub async fn find_upcoming(db: &Database, limit: i64) -> Result<Vec<Event>, Error> {
+pub async fn find_upcoming(conn: &mut PgConnection, limit: i64) -> Result<Vec<Event>, sqlx::Error> {
     let now = Utc::now();
-    let bson_now = BsonDateTime::from_millis(now.timestamp_millis());
-    let filter = doc! { 
-        "datetime": { "$gte": bson_now },
-        "confirmed": true 
-    };
-    let options = mongodb::options::FindOptions::builder()
-        .sort(doc! { "datetime": 1 })
-        .limit(limit)
-        .build();
-    
-    let mut cursor = db.collection::<Event>(COLLECTION_NAME).find(filter, options).await?;
-    let mut events = Vec::new();
-    while let Some(event) = cursor.try_next().await? {
-        events.push(event);
-    }
-    Ok(events)
+    let rows = sqlx::query(
+        r#"
+        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price 
+        FROM events
+        WHERE datetime >= $1 AND confirmed = true
+        ORDER BY datetime
+        LIMIT $2
+        "#
+    )
+    .bind(now)
+    .bind(limit)
+    .fetch_all(conn)
+    .await?;
+
+    Ok(rows.into_iter().map(|row| Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    }).collect())
 }
 
-pub async fn update(db: &Database, id: &ObjectId, event: &Event) -> Result<UpdateResult, Error> {
-    let filter = doc! { "_id": id };
-    let event_doc = mongodb::bson::to_document(event)?;
-    let update = doc! { "$set": event_doc };
-    db.collection::<Event>(COLLECTION_NAME).update_one(filter, update, None).await
+pub async fn update(conn: &mut PgConnection, id: &Uuid, event: &Event) -> Result<Event, sqlx::Error> {
+    let row = sqlx::query(
+        r#"
+        UPDATE events
+        SET name = $2, description = $3, datetime = $4, location_id = $5, event_type = $6, max_participants = $7, participants = $8, level = $9, confirmed = $10, price = $11
+        WHERE id = $1
+        RETURNING id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price
+        "#
+    )
+    .bind(id)
+    .bind(&event.name)
+    .bind(&event.description)
+    .bind(&event.datetime)
+    .bind(&event.location_id)
+    .bind(&event.event_type)
+    .bind(&event.max_participants)
+    .bind(Json(&event.participants))
+    .bind(&event.level)
+    .bind(&event.confirmed)
+    .bind(&event.price)
+    .fetch_one(conn)
+    .await?;
+
+    Ok(Event {
+        id: row.get("id"),
+        name: row.get("name"),
+        description: row.get("description"),
+        datetime: row.get("datetime"),
+        location_id: row.get("location_id"),
+        event_type: row.get("event_type"),
+        max_participants: row.get("max_participants"),
+        participants: row.get::<Json<Vec<Participant>>, _>("participants").0,
+        level: row.get("level"),
+        confirmed: row.get("confirmed"),
+        price: row.get("price"),
+    })
 }
 
-pub async fn add_participant(db: &Database, event_id: &ObjectId, participant: &Participant) -> Result<(), Error> {
-    let filter = doc! { "_id": event_id };
-    let update = doc! {
-        "$push": {
-            "participants": mongodb::bson::to_bson(participant)?
-        }
-    };
-    db.collection::<Event>(COLLECTION_NAME).update_one(filter, update, None).await?;
+pub async fn add_participant(conn: &mut PgConnection, event_id: &Uuid, participant: &Participant) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        "UPDATE events SET participants = participants || $1::jsonb WHERE id = $2"
+    )
+    .bind(Json(participant))
+    .bind(event_id)
+    .execute(conn)
+    .await?;
     Ok(())
 }
 
 pub async fn update_participant_status(
-    db: &Database, 
-    event_id: &ObjectId, 
-    user_id: &ObjectId, 
-    status: &str,
-    payment: &str
-) -> Result<(), Error> {
-    let filter = doc! { 
-        "_id": event_id,
-        "participants.user_id": user_id
-    };
-    let update = doc! {
-        "$set": {
-            "participants.$.status": status,
-            "participants.$.payment": payment
-        }
-    };
-    db.collection::<Event>(COLLECTION_NAME).update_one(filter, update, None).await?;
+    conn: &mut PgConnection,
+    event_id: &Uuid,
+    user_id: &Uuid,
+    status: &ParticipantStatus,
+    payment: &PaymentStatus,
+) -> Result<(), sqlx::Error> {
+    let status_str = serde_json::to_string(status).unwrap();
+    let payment_str = serde_json::to_string(payment).unwrap();
+
+    sqlx::query(
+        r#"
+        UPDATE events
+        SET participants = (
+            SELECT jsonb_agg(
+                CASE
+                    WHEN (p->>'user_id')::uuid = $2 THEN
+                        jsonb_set(jsonb_set(p, '{status}', $3::jsonb), '{payment}', $4::jsonb)
+                    ELSE p
+                END
+            )
+            FROM jsonb_array_elements(participants) p
+        )
+        WHERE id = $1
+        "#
+    )
+    .bind(event_id)
+    .bind(user_id)
+    .bind(&status_str)
+    .bind(&payment_str)
+    .execute(conn)
+    .await?;
     Ok(())
 }
 
-pub async fn remove_participant(db: &Database, event_id: &ObjectId, user_id: &ObjectId) -> Result<(), Error> {
-    let filter = doc! { "_id": event_id };
-    let update = doc! {
-        "$pull": {
-            "participants": { "user_id": user_id }
-        }
-    };
-    db.collection::<Event>(COLLECTION_NAME).update_one(filter, update, None).await?;
+pub async fn remove_participant(conn: &mut PgConnection, event_id: &Uuid, user_id: &Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query(
+        r#"
+        UPDATE events
+        SET participants = (
+            SELECT jsonb_agg(p)
+            FROM jsonb_array_elements(participants) p
+            WHERE (p->>'user_id')::uuid != $1
+        )
+        WHERE id = $2
+        "#
+    )
+    .bind(user_id)
+    .bind(event_id)
+    .execute(conn)
+    .await?;
     Ok(())
 }
 
-pub async fn delete(db: &Database, id: &ObjectId) -> Result<DeleteResult, Error> {
-    db.collection::<Event>(COLLECTION_NAME).delete_one(doc! { "_id": id }, None).await
+pub async fn delete(conn: &mut PgConnection, id: &Uuid) -> Result<(), sqlx::Error> {
+    sqlx::query("DELETE FROM events WHERE id = $1")
+        .bind(id)
+        .execute(conn)
+        .await?;
+    Ok(())
 } 
