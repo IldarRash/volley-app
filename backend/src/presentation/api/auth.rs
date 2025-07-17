@@ -7,8 +7,9 @@ use rocket_db_pools::Connection;
 #[post("/register", data = "<request>")]
 pub async fn register(request: Json<RegisterRequest>, db: Connection<Db>) -> Result<Json<AuthResponse>, Status> {
     println!("Register request received: {:?}", request);
+    let db = &db.database("volleyApp");
     
-    let user = match register_user(&db, &request.username, &request.password).await {
+    let user = match register_user(db, &request.username, &request.password).await {
         Ok(user) => user,
         Err(e) => {
             eprintln!("Registration error: {}", e);
@@ -17,7 +18,7 @@ pub async fn register(request: Json<RegisterRequest>, db: Connection<Db>) -> Res
     };
     
     // Auto-login after registration
-    let (user, token) = match login_user(&db, &request.username, &request.password).await {
+    let (user, token) = match login_user(db, &request.username, &request.password).await {
         Ok(result) => result,
         Err(e) => {
             eprintln!("Auto-login error: {}", e);
@@ -41,8 +42,9 @@ pub async fn register(request: Json<RegisterRequest>, db: Connection<Db>) -> Res
 #[post("/login", data = "<request>")]
 pub async fn login(request: Json<LoginRequest>, db: Connection<Db>) -> Result<Json<AuthResponse>, Status> {
     println!("Login request received: {:?}", request);
+    let db = &db.database("volleyApp");
     
-    let (user, token) = match login_user(&db, &request.username, &request.password).await {
+    let (user, token) = match login_user(db, &request.username, &request.password).await {
         Ok(result) => result,
         Err(e) => {
             eprintln!("Login error: {}", e);
