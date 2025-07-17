@@ -1,5 +1,5 @@
 use sqlx::{types::uuid::Uuid, PgConnection, Row, types::Json};
-use crate::domain::{User, UserRole, Subscription};
+use crate::domain::{User, Subscription};
 
 pub async fn create(conn: &mut PgConnection, user: &User) -> Result<User, sqlx::Error> {
     let row = sqlx::query(

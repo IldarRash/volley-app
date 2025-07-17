@@ -1,0 +1,31 @@
+<h2>Add New Location</h2>
+<form [formGroup]="locationForm" (ngSubmit)="onSubmit()">
+  <div>
+    <label for="name">Name</label>
+    <input id="name" formControlName="name">
+  </div>
+  <div>
+    <label for="address">Address</label>
+    <input id="address" formControlName="address">
+  </div>
+  <div>
+    <label for="latitude">Latitude</label>
+    <input id="latitude" type="number" formControlName="latitude">
+  </div>
+  <div>
+    <label for="longitude">Longitude</label>
+    <input id="longitude" type="number" formControlName="longitude">
+  </div>
+  <div>
+    <label for="description">Description</label>
+    <textarea id="description" formControlName="description"></textarea>
+  </div>
+  <div>
+    <label for="type">Type</label>
+    <select id="type" formControlName="type">
+      <option value="classic">Classic</option>
+      <option value="beach">Beach</option>
+    </select>
+  </div>
+  <button type="submit" [disabled]="!locationForm.valid">Add Location</button>
+</form>

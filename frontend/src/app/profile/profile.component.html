@@ -1,0 +1,25 @@
+<div *ngIf="user">
+  <h2>Profile</h2>
+  <form (ngSubmit)="updateProfile()">
+    <div>
+      <label for="username">Username</label>
+      <input id="username" [(ngModel)]="user.username" name="username" required>
+    </div>
+    <div>
+      <label for="telegram_id">Telegram ID</label>
+      <input id="telegram_id" [(ngModel)]="user.telegram_id" name="telegram_id">
+    </div>
+    <div>
+      <label for="instagram_link">Instagram Link</label>
+      <input id="instagram_link" [(ngModel)]="user.instagram_link" name="instagram_link">
+    </div>
+    <div>
+      <label for="image_url">Image URL</label>
+      <input id="image_url" [(ngModel)]="user.image_url" name="image_url">
+    </div>
+    <button type="submit">Update Profile</button>
+  </form>
+</div>
+<div *ngIf="!user">
+  <p>Loading profile...</p>
+</div>

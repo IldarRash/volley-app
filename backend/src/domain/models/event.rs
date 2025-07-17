@@ -1,6 +1,6 @@
 use serde::{Serialize, Deserialize};
 use chrono::{DateTime, Utc};
-use super::{EventType, EventLevel};
+use super::EventType;
 use crate::domain::models::{ParticipantStatus, PaymentStatus};
 use sqlx::types::uuid::Uuid;
 

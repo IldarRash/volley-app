@@ -1,5 +1,6 @@
 use sqlx::{types::uuid::Uuid, PgConnection, Row, types::Json};
 use crate::domain::Location;
+use crate::domain::models::location::Coordinates;
 
 pub async fn create(conn: &mut PgConnection, location: &Location) -> Result<Location, sqlx::Error> {
     let row = sqlx::query(
@@ -20,7 +21,7 @@ pub async fn create(conn: &mut PgConnection, location: &Location) -> Result<Loca
     Ok(Location {
         id: row.get("id"),
         name: row.get("name"),
-        coordinates: row.get::<Json<[f64; 2]>, _>("coordinates").0,
+        coordinates: row.get::<Json<Coordinates>, _>("coordinates").0,
         confirmed: row.get("confirmed"),
         image_url: row.get("image_url"),
     })
@@ -37,7 +38,7 @@ pub async fn find_by_id(conn: &mut PgConnection, id: &Uuid) -> Result<Option<Loc
     Ok(row.map(|row| Location {
         id: row.get("id"),
         name: row.get("name"),
-        coordinates: row.get::<Json<[f64; 2]>, _>("coordinates").0,
+        coordinates: row.get::<Json<Coordinates>, _>("coordinates").0,
         confirmed: row.get("confirmed"),
         image_url: row.get("image_url"),
     }))
@@ -53,7 +54,7 @@ pub async fn find_all_confirmed(conn: &mut PgConnection) -> Result<Vec<Location>
     Ok(rows.into_iter().map(|row| Location {
         id: row.get("id"),
         name: row.get("name"),
-        coordinates: row.get::<Json<[f64; 2]>, _>("coordinates").0,
+        coordinates: row.get::<Json<Coordinates>, _>("coordinates").0,
         confirmed: row.get("confirmed"),
         image_url: row.get("image_url"),
     }).collect())
@@ -69,7 +70,7 @@ pub async fn find_all(conn: &mut PgConnection) -> Result<Vec<Location>, sqlx::Er
     Ok(rows.into_iter().map(|row| Location {
         id: row.get("id"),
         name: row.get("name"),
-        coordinates: row.get::<Json<[f64; 2]>, _>("coordinates").0,
+        coordinates: row.get::<Json<Coordinates>, _>("coordinates").0,
         confirmed: row.get("confirmed"),
         image_url: row.get("image_url"),
     }).collect())
@@ -95,7 +96,7 @@ pub async fn update(conn: &mut PgConnection, id: &Uuid, location: &Location) -> 
     Ok(Location {
         id: row.get("id"),
         name: row.get("name"),
-        coordinates: row.get::<Json<[f64; 2]>, _>("coordinates").0,
+        coordinates: row.get::<Json<Coordinates>, _>("coordinates").0,
         confirmed: row.get("confirmed"),
         image_url: row.get("image_url"),
     })

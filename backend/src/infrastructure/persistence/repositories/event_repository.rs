@@ -1,5 +1,5 @@
 use sqlx::{types::uuid::Uuid, PgConnection, types::chrono::Utc, types::Json, Row};
-use crate::domain::{Event, Participant, ParticipantStatus, PaymentStatus, EventType};
+use crate::domain::{Event, Participant, ParticipantStatus, PaymentStatus};
 
 pub async fn create(conn: &mut PgConnection, event: &Event) -> Result<Event, sqlx::Error> {
     let row = sqlx::query(
@@ -42,7 +42,7 @@ pub async fn create(conn: &mut PgConnection, event: &Event) -> Result<Event, sql
 
 pub async fn find_all(conn: &mut PgConnection) -> Result<Vec<Event>, sqlx::Error> {
     let rows = sqlx::query(
-        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events"#
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id FROM events"#
     )
     .fetch_all(conn)
     .await?;
@@ -59,12 +59,13 @@ pub async fn find_all(conn: &mut PgConnection) -> Result<Vec<Event>, sqlx::Error
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     }).collect())
 }
 
 pub async fn find_by_location_id(conn: &mut PgConnection, location_id: &Uuid) -> Result<Vec<Event>, sqlx::Error> {
     let rows = sqlx::query(
-        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events WHERE location_id = $1"#
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id FROM events WHERE location_id = $1"#
     )
     .bind(location_id)
     .fetch_all(conn)
@@ -82,12 +83,13 @@ pub async fn find_by_location_id(conn: &mut PgConnection, location_id: &Uuid) ->
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     }).collect())
 }
 
 pub async fn find_by_id(conn: &mut PgConnection, id: &Uuid) -> Result<Option<Event>, sqlx::Error> {
     let row = sqlx::query(
-        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price FROM events WHERE id = $1"#
+        r#"SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id FROM events WHERE id = $1"#
     )
     .bind(id)
     .fetch_optional(conn)
@@ -105,13 +107,14 @@ pub async fn find_by_id(conn: &mut PgConnection, id: &Uuid) -> Result<Option<Eve
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     }))
 }
 
 pub async fn find_by_user(conn: &mut PgConnection, user_id: &Uuid) -> Result<Vec<Event>, sqlx::Error> {
     let rows = sqlx::query(
         r#"
-        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price
+        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id
         FROM events, jsonb_to_recordset(participants) as p(user_id uuid)
         WHERE p.user_id = $1
         "#
@@ -132,6 +135,7 @@ pub async fn find_by_user(conn: &mut PgConnection, user_id: &Uuid) -> Result<Vec
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     }).collect())
 }
 
@@ -139,7 +143,7 @@ pub async fn find_upcoming(conn: &mut PgConnection, limit: i64) -> Result<Vec<Ev
     let now = Utc::now();
     let rows = sqlx::query(
         r#"
-        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price 
+        SELECT id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id
         FROM events
         WHERE datetime >= $1 AND confirmed = true
         ORDER BY datetime
@@ -163,6 +167,7 @@ pub async fn find_upcoming(conn: &mut PgConnection, limit: i64) -> Result<Vec<Ev
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     }).collect())
 }
 
@@ -170,9 +175,9 @@ pub async fn update(conn: &mut PgConnection, id: &Uuid, event: &Event) -> Result
     let row = sqlx::query(
         r#"
         UPDATE events
-        SET name = $2, description = $3, datetime = $4, location_id = $5, event_type = $6, max_participants = $7, participants = $8, level = $9, confirmed = $10, price = $11
+        SET name = $2, description = $3, datetime = $4, location_id = $5, event_type = $6, max_participants = $7, participants = $8, level = $9, confirmed = $10, price = $11, trainer_id = $12
         WHERE id = $1
-        RETURNING id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price
+        RETURNING id, name, description, datetime, location_id, event_type, max_participants, participants, level, confirmed, price, trainer_id
         "#
     )
     .bind(id)
@@ -186,6 +191,7 @@ pub async fn update(conn: &mut PgConnection, id: &Uuid, event: &Event) -> Result
     .bind(&event.level)
     .bind(&event.confirmed)
     .bind(&event.price)
+    .bind(&event.trainer_id)
     .fetch_one(conn)
     .await?;
 
@@ -201,6 +207,7 @@ pub async fn update(conn: &mut PgConnection, id: &Uuid, event: &Event) -> Result
         level: row.get("level"),
         confirmed: row.get("confirmed"),
         price: row.get("price"),
+        trainer_id: row.get("trainer_id"),
     })
 }
 

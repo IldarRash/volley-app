@@ -1,0 +1,57 @@
+.container {
+  display: flex;
+  height: calc(100vh - 64px); /* Adjust based on toolbar height */
+}
+
+.map-container {
+  width: 70%;
+  height: 100%;
+}
+
+.sidebar {
+  width: 30%;
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #f5f5f5;
+  border-left: 1px solid #ddd;
+}
+
+.event-list {
+  margin-top: 20px;
+}
+
+.event-card, .location-card {
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.event-card:hover, .location-card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #fff;
+  color: #333;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.leaflet-popup-content {
+  font-family: 'Roboto', sans-serif;
+}
+
+.leaflet-popup-content h4 {
+  margin: 0 0 10px;
+  color: #007bff;
+}
+
+.beach-marker {
+  background-image: url('/assets/beach-marker.png');
+  background-size: cover;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow: 0 0 5px rgba(0,0,0,0.5);
+} 

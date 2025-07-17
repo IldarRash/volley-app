@@ -9,4 +9,4 @@ pub use models::{
     event_timer::EventTimer,
     subscription::Subscription,
 };
-pub use models::{UserRole, EventType, EventLevel, ParticipantStatus, PaymentStatus}; 
+pub use models::{UserRole, EventType, ParticipantStatus, PaymentStatus}; 

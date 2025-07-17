@@ -1,0 +1,9 @@
+<h2>Subscriptions</h2>
+<div class="subscriptions-container">
+  <div *ngFor="let sub of subscriptions" class="subscription-card">
+    <h3>{{ sub.name }}</h3>
+    <p>Price: {{ sub.price }}</p>
+    <p>Duration: {{ sub.duration_days }} days</p>
+    <button (click)="purchase(sub.id)">Purchase</button>
+  </div>
+</div>

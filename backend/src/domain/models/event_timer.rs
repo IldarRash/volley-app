@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use super::{EventType, EventLevel};
+use super::EventType;
 use sqlx::types::uuid::Uuid;
 use sqlx::types::chrono::NaiveTime;
 
