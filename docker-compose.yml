@@ -7,20 +7,23 @@ services:
       dockerfile: Dockerfile.backend
     ports:
       - "8080:8080"
-    depends_on:
-      - mongo
     environment:
       - MONGO_URI=mongodb://mongo:27017
+      - TELOXIDE_TOKEN=YOUR_TELEGRAM_BOT_TOKEN_HERE
+    depends_on:
+      - mongo
+    volumes:
+      - ./backend:/usr/src/volleyapp
 
   frontend:
-    container_name: volleyapp-frontend
     build:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "4040:80"
-    depends_on:
-      - backend
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/src/app
+      - /usr/src/app/node_modules
 
   mongo:
     image: mongo:latest

@@ -1,44 +1,40 @@
 <h2>Свободные слоты на неделю!</h2>
 
 <div class="container">
-  <mat-tab-group>
-    <mat-tab label="Beosand">
-      <div class="content">
-        <div class="map-container">
-          <div id="map"></div>
-        </div>
-        <div class="list-container">
-          <h2>Locations</h2>
-          <ul>
-            <li *ngFor="let location of locations" (click)="onLocationSelect(location)" [class.selected]="location === selectedLocation">
-              <h3>{{ location.name }}</h3>
-              <p>Coordinates: {{ location.coordinates.join(', ') }}</p>
-            </li>
-          </ul>
-
-          <div *ngIf="selectedLocation">
-            <h2>Events at {{ selectedLocation.name }}</h2>
-            <div *ngIf="events.length > 0; else noEvents">
-              <ul>
-                <li *ngFor="let event of events">
-                  <p>{{ event.type }} - {{ event.datetime | date:'short' }}</p>
-                  <p>Level: {{ event.level }}</p>
-                  <p>Price: {{ event.price }}</p>
-                </li>
-              </ul>
-            </div>
-            <ng-template #noEvents>
-              <p>No events found for this location.</p>
-            </ng-template>
-          </div>
-        </div>
+  <div class="map-container">
+    <div class="map" #map></div>
+  </div>
+  <div class="sidebar">
+    <h2>Locations</h2>
+    <ul>
+      <li *ngFor="let location of locations" (click)="onLocationClick(location)">
+        {{ location.name }}
+      </li>
+    </ul>
+  </div>
+  <div class="events-container">
+    <h2>Upcoming Events</h2>
+    <div class="filters">
+      <mat-form-field>
+        <mat-label>Event Type</mat-label>
+        <mat-select (selectionChange)="filterEvents($event.value)">
+          <mat-option value="all">All</mat-option>
+          <mat-option value="training">Training</mat-option>
+          <mat-option value="game">Game</mat-option>
+          <mat-option value="tournament">Tournament</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+    <div *ngIf="filteredEvents.length > 0; else noEvents">
+      <div *ngFor="let event of filteredEvents" class="event-card">
+        <h3>{{ event.type }} at {{ event.location_id }}</h3>
+        <p>Date: {{ event.datetime | date:'short' }}</p>
+        <p>Level: {{ event.level }}</p>
+        <button mat-raised-button color="primary" (click)="joinEvent(event.id)">Join</button>
       </div>
-    </mat-tab>
-    <mat-tab label="Events">
-      <p>Content for Events tab</p>
-    </mat-tab>
-    <mat-tab label="Profile">
-      <p>Content for Profile tab</p>
-    </mat-tab>
-  </mat-tab-group>
+    </div>
+    <ng-template #noEvents>
+      <p>No upcoming events.</p>
+    </ng-template>
+  </div>
 </div> 

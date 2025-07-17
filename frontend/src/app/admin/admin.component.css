@@ -1,0 +1,35 @@
+.admin-panel {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  font-family: 'Roboto', sans-serif;
+}
+
+h2, h3 {
+  color: #343a40;
+}
+
+.admin-section {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+table {
+  width: 100%;
+}
+
+.mat-elevation-z8 {
+  box-shadow: none;
+}
+
+.action-buttons button {
+  margin-right: 8px;
+}
+

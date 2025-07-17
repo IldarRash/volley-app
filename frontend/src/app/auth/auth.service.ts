@@ -1,47 +1,62 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { jwtDecode } from 'jwt-decode';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/auth';
-  private token: string | null = null;
+  private tokenKey = 'auth_token';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) {}
 
-  register(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, credentials);
+  register(user: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, user);
   }
 
   login(credentials: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
-        this.setToken(response.token);
+        if (response && response.token) {
+          localStorage.setItem(this.tokenKey, response.token);
+        }
       })
     );
   }
 
-  logout(): void {
-    this.token = null;
-    localStorage.removeItem('authToken');
+  logout() {
+    localStorage.removeItem(this.tokenKey);
+    this.router.navigate(['/login']);
+  }
+
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    return token !== null && !this.isTokenExpired(token);
   }
 
   getToken(): string | null {
-    if (!this.token) {
-      this.token = localStorage.getItem('authToken');
+    return localStorage.getItem(this.tokenKey);
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.exp < Date.now() / 1000;
+    } catch (err) {
+      return false;
     }
-    return this.token;
   }
 
-  private setToken(token: string): void {
-    this.token = token;
-    localStorage.setItem('authToken', token);
-  }
-
-  isAuthenticated(): boolean {
-    return !!this.getToken();
+  isAdmin(): boolean {
+    const token = this.getToken();
+    if (token) {
+      const decoded: any = jwtDecode(token);
+      return decoded.role === 'admin';
+    }
+    return false;
   }
 }
