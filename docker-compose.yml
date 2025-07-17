@@ -13,11 +13,12 @@ services:
       - MONGO_URI=mongodb://mongo:27017
 
   frontend:
+    container_name: volleyapp-frontend
     build:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "80:80"
+      - "4040:80"
     depends_on:
       - backend
 

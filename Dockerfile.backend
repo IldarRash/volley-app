@@ -1,7 +1,7 @@
 # Dockerfile for Rust Backend
 
 # Stage 1: Build the application
-FROM rust:1.79 as builder
+FROM rust:latest as builder
 
 # Create a new empty shell project
 WORKDIR /usr/src/volleyapp
@@ -12,7 +12,7 @@ RUN cargo install --path .
 
 # Stage 2: Create a minimal production image
 FROM gcr.io/distroless/cc-debian12
-COPY --from=builder /usr/local/cargo/bin/volleyapp /usr/local/bin/volleyapp
+COPY --from=builder /usr/local/cargo/bin/backend /usr/local/bin/volleyapp
 
 # Set the entrypoint
 ENTRYPOINT ["/usr/local/bin/volleyapp"] 

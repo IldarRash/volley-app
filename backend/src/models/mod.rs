@@ -1,6 +1,9 @@
 // backend/src/models/mod.rs
 
+pub mod location;
+pub mod event;
 pub mod user;
+pub mod event_timer;
 
 use serde::{Deserialize, Serialize};
 

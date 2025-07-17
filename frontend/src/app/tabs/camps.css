@@ -1,0 +1,4 @@
+.mat-tab-label:nth-child(3) {
+    background-color: black !important;
+    color: white !important;
+}

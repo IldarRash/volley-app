@@ -4,8 +4,15 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-tokio = { version = "1", features = ["full"] }
-actix-web = "4"
+rocket = { version = "0.5.1", features = ["json"] }
+mongodb = "2.8.2"
 serde = { version = "1.0", features = ["derive"] }
-mongodb = "2"
-uuid = { version = "1", features = ["v4", "serde"] }
+futures = "0.3"
+uuid = { version = "1.8.0", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+jsonwebtoken = "9.3.0"
+bcrypt = "0.15.1"
+
+[dependencies.rocket_db_pools]
+version = "0.1.0"
+features = ["mongodb"]
