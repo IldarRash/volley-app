@@ -19,6 +19,12 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTableModule } from '@angular/material/table';
+import { MatTabsModule } from '@angular/material/tabs';
+import { FormsModule } from '@angular/forms';
+
+import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
+
+const config: SocketIoConfig = { url: 'http://localhost:8000', options: {} };
 
 // Components
 import { BeosandComponent } from './beosand/beosand.component';
@@ -26,6 +32,8 @@ import { LoginComponent } from './auth/login/login.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { AdminComponent } from './admin/admin.component';
 import { ProfileComponent } from './profile/profile.component';
+import { AddLocationComponent } from './admin/add-location/add-location.component';
+import { SubscriptionsComponent } from './subscriptions/subscriptions.component';
 
 @NgModule({
   declarations: [
@@ -34,7 +42,9 @@ import { ProfileComponent } from './profile/profile.component';
     LoginComponent,
     RegisterComponent,
     AdminComponent,
-    ProfileComponent
+    ProfileComponent,
+    AddLocationComponent,
+    SubscriptionsComponent
   ],
   imports: [
     BrowserModule,
@@ -42,6 +52,7 @@ import { ProfileComponent } from './profile/profile.component';
     BrowserAnimationsModule,
     HttpClientModule,
     ReactiveFormsModule,
+    FormsModule,
     MatToolbarModule,
     MatButtonModule,
     MatIconModule,
@@ -53,7 +64,9 @@ import { ProfileComponent } from './profile/profile.component';
     MatSnackBarModule,
     MatExpansionModule,
     MatSelectModule,
-    MatTableModule
+    MatTableModule,
+    MatTabsModule,
+    SocketIoModule.forRoot(config)
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -72,6 +72,7 @@ fn rocket() -> _ {
             auth::login,
         ])
         .mount("/admin", routes![
+            admin::import_users_csv,
             admin::get_users,
             admin::set_user_role,
             admin::create_location,

@@ -20,22 +20,24 @@ export class AuthService {
 
   login(credentials: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
-        if (response && response.token) {
-          localStorage.setItem(this.tokenKey, response.token);
-        }
+      tap((response: any) => {
+        localStorage.setItem('token', response.token);
+        localStorage.setItem('userId', response.user_id);
       })
     );
   }
 
-  logout() {
-    localStorage.removeItem(this.tokenKey);
-    this.router.navigate(['/login']);
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+  }
+
+  getUserId(): string | null {
+    return localStorage.getItem('userId');
   }
 
   isLoggedIn(): boolean {
-    const token = this.getToken();
-    return token !== null && !this.isTokenExpired(token);
+    return !!localStorage.getItem('token');
   }
 
   getToken(): string | null {

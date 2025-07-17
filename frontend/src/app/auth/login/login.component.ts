@@ -1,40 +1,26 @@
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Component } from '@angular/core';
 import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
-  loginForm: FormGroup;
-  error: string | null = null;
+export class LoginComponent {
+  username = '';
+  password = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private authService: AuthService,
-    private router: Router
-  ) {
-    this.loginForm = this.fb.group({
-      username: ['', [Validators.required]],
-      password: ['', [Validators.required]]
-    });
-  }
-
-  ngOnInit(): void {}
+  constructor(private authService: AuthService, private router: Router) {}
 
   onSubmit(): void {
-    if (this.loginForm.valid) {
-      this.authService.login(this.loginForm.value).subscribe(
-        () => {
-          this.router.navigate(['/beosand']);
-        },
-        (err) => {
-          this.error = 'Invalid username or password';
-        }
-      );
-    }
+    this.authService.login({ username: this.username, password: this.password }).subscribe(
+      () => {
+        this.router.navigate(['/']);
+      },
+      (err) => {
+        console.error('Login failed', err);
+      }
+    );
   }
 }

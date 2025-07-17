@@ -2,6 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from '../auth/auth.service';
+import { Location } from '../models/location.model';
+import { Event } from '../models/event.model';
+import { User } from '../models/user.model';
+import { Subscription } from '../models/subscription.model';
 
 @Injectable({
   providedIn: 'root'
@@ -33,8 +37,28 @@ export class ApiService {
   }
 
   // Old methods to be kept for now
-  getLocations(): Observable<any[]> {
-    return this.get('/locations');
+  getLocations(): Observable<Location[]> {
+    return this.http.get<Location[]>(`${this.apiUrl}/locations`);
+  }
+
+  addLocation(location: Location): Observable<Location> {
+    return this.http.post<Location>(`${this.apiUrl}/locations`, location);
+  }
+
+  getUser(userId: string): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/users/${userId}`);
+  }
+
+  updateUser(userId: string, user: User): Observable<User> {
+    return this.http.put<User>(`${this.apiUrl}/users/${userId}`, user);
+  }
+
+  getSubscriptions(): Observable<Subscription[]> {
+    return this.http.get<Subscription[]>(`${this.apiUrl}/subscriptions`);
+  }
+
+  purchaseSubscription(userId: string, subscriptionId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/users/${userId}/subscriptions`, { subscriptionId });
   }
 
   getUpcomingEvents(): Observable<any[]> {

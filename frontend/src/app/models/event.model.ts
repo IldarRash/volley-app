@@ -1,15 +1,9 @@
 export interface Event {
-  _id: any;
-  type: 'training' | 'game' | 'tournament';
-  location_id: any;
-  datetime: string;
-  level: 'beginner' | 'intermediate' | 'advanced';
-  price: number;
-  trainer_id?: any;
+  id: string;
+  event_type: string;
+  datetime: Date;
+  location_id: string;
+  participants: string[];
+  max_participants: number;
   confirmed: boolean;
-  participants: {
-    user_id: any;
-    status: 'pending' | 'confirmed';
-    payment: 'manual' | 'pass' | 'unpaid';
-  }[];
 } 

@@ -9,11 +9,12 @@ pub mod subscription;
 use serde::{Deserialize, Serialize};
 
 /// User roles in the system
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, Default)]
 #[serde(rename_all = "lowercase")]
 pub enum UserRole {
-    User,
     Admin,
+    #[default]
+    User,
 }
 
 /// Event types

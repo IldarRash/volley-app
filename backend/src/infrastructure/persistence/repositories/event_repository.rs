@@ -29,7 +29,18 @@ pub async fn find_by_location_id(db: &Database, location_id: &ObjectId) -> Resul
 }
 
 pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Option<Event>, Error> {
-    db.collection::<Event>(COLLECTION_NAME).find_one(doc! { "_id": id }, None).await
+    let doc = db.collection::<Event>(COLLECTION_NAME).find_one(doc! { "_id": id }, None).await?;
+    Ok(doc.map(Event::from))
+}
+
+pub async fn find_by_user(db: &Database, user_id: &ObjectId) -> Result<Vec<Event>, Error> {
+    let collection = db.collection::<Event>(COLLECTION_NAME);
+    let mut cursor = collection.find(doc! { "participants": user_id }, None).await?;
+    let mut events = Vec::new();
+    while let Some(doc) = cursor.try_next().await? {
+        events.push(Event::from(doc));
+    }
+    Ok(events)
 }
 
 pub async fn find_upcoming(db: &Database, limit: i64) -> Result<Vec<Event>, Error> {

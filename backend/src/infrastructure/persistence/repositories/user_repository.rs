@@ -5,6 +5,8 @@ use futures::stream::TryStreamExt;
 
 const COLLECTION_NAME: &str = "users";
 
+pub struct UserRepository;
+
 #[derive(Debug, Serialize, Deserialize)]
 struct UserDocument {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
@@ -17,6 +19,7 @@ struct UserDocument {
     pub instagram_link: Option<String>,
     pub image_url: Option<String>,
     pub subscriptions: Vec<serde_json::Value>,
+    pub subscribed: bool,
 }
 
 impl From<&User> for UserDocument {
@@ -31,6 +34,7 @@ impl From<&User> for UserDocument {
             instagram_link: user.instagram_link.clone(),
             image_url: user.image_url.clone(),
             subscriptions: user.subscriptions.iter().map(|s| serde_json::to_value(s).unwrap()).collect(),
+            subscribed: user.subscribed,
         }
     }
 }
@@ -47,6 +51,7 @@ impl From<UserDocument> for User {
             instagram_link: doc.instagram_link,
             image_url: doc.image_url,
             subscriptions: doc.subscriptions.into_iter().map(|s| serde_json::from_value(s).unwrap()).collect(),
+            subscribed: doc.subscribed,
         }
     }
 }
@@ -66,6 +71,12 @@ pub async fn find_by_username(db: &Database, username: &str) -> Result<Option<Us
 pub async fn find_by_id(db: &Database, id: &ObjectId) -> Result<Option<User>, Error> {
     let collection = db.collection::<UserDocument>(COLLECTION_NAME);
     let doc = collection.find_one(doc! { "_id": id }, None).await?;
+    Ok(doc.map(User::from))
+}
+
+pub async fn find_by_telegram_id(db: &Database, telegram_id: &str) -> Result<Option<User>, Error> {
+    let collection = db.collection::<UserDocument>(COLLECTION_NAME);
+    let doc = collection.find_one(doc! { "telegram_id": telegram_id }, None).await?;
     Ok(doc.map(User::from))
 }
 

@@ -13,28 +13,12 @@
     </ul>
   </div>
   <div class="events-container">
-    <h2>Upcoming Events</h2>
-    <div class="filters">
-      <mat-form-field>
-        <mat-label>Event Type</mat-label>
-        <mat-select (selectionChange)="filterEvents($event.value)">
-          <mat-option value="all">All</mat-option>
-          <mat-option value="training">Training</mat-option>
-          <mat-option value="game">Game</mat-option>
-          <mat-option value="tournament">Tournament</mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div *ngFor="let event of events$ | async" class="event-card">
+      <h3>{{ event.event_type }}</h3>
+      <p>Date: {{ event.datetime | date:'short' }}</p>
+      <p>Location: {{ event.location_id }}</p>
+      <p>Participants: {{ event.participants.length }} / {{ event.max_participants }}</p>
+      <button>Join</button>
     </div>
-    <div *ngIf="filteredEvents.length > 0; else noEvents">
-      <div *ngFor="let event of filteredEvents" class="event-card">
-        <h3>{{ event.type }} at {{ event.location_id }}</h3>
-        <p>Date: {{ event.datetime | date:'short' }}</p>
-        <p>Level: {{ event.level }}</p>
-        <button mat-raised-button color="primary" (click)="joinEvent(event.id)">Join</button>
-      </div>
-    </div>
-    <ng-template #noEvents>
-      <p>No upcoming events.</p>
-    </ng-template>
   </div>
 </div> 

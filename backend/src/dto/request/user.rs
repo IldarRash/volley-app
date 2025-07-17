@@ -11,4 +11,13 @@ pub struct UserRegistrationRequest {
     pub password: String,
     pub gender: Gender,
     pub positions: Vec<PlayerPosition>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UserImportRecord {
+    pub username: String,
+    pub email: String,
+    pub telegram_id: String,
+    pub rating: f64,
+    pub instagram_link: String,
 } 

@@ -1,1 +1,9 @@
-<p>classic works!</p> 
+<div class="events-container">
+  <div *ngFor="let event of events$ | async" class="event-card">
+    <h3>{{ event.event_type }}</h3>
+    <p>Date: {{ event.datetime | date:'short' }}</p>
+    <p>Location: {{ event.location_id }}</p>
+    <p>Participants: {{ event.participants.length }} / {{ event.max_participants }}</p>
+    <button>Join</button>
+  </div>
+</div> 

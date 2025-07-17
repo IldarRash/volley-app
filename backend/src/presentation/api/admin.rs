@@ -1,12 +1,63 @@
-use rocket::{get, post, put, delete, serde::json::Json, http::Status};
+use rocket::{get, post, put, delete, serde::json::Json, http::Status, Data};
 use mongodb::bson::oid::ObjectId;
 use crate::domain::{Location, Event, EventTimer};
 use crate::domain::models::UserRole;
 use crate::infrastructure::persistence::{get_db, repositories::{location_repository, event_repository, event_timer_repository, user_repository}};
 use crate::infrastructure::external::telegram;
 use crate::presentation::middleware::auth::AdminUser;
+use crate::application::use_cases::admin::AdminUseCases;
+use rocket::data::{ByteUnit, ToByteUnit};
+use rocket::response::status;
+use rocket::State;
+use mongodb::Database;
 
 // User management
+#[post("/users/import/csv", data = "<csv_data>")]
+pub async fn import_users_csv(
+    csv_data: Data<'_>,
+    _admin: AdminUser,
+) -> Result<Json<String>, Status> {
+    let db = get_db().await.map_err(|_| Status::InternalServerError)?;
+
+    let bytes = csv_data
+        .open(2.mebibytes())
+        .into_bytes()
+        .await
+        .map_err(|_| Status::BadRequest)?
+        .into_inner();
+
+    match AdminUseCases::import_users_from_csv(&db, &bytes).await {
+        Ok(count) => Ok(Json(format!("Successfully imported {} users.", count))),
+        Err(e) => {
+            eprintln!("Failed to import users: {}", e);
+            Err(Status::InternalServerError)
+        }
+    }
+}
+
+#[post("/users/import/json", data = "<json_data>")]
+pub async fn import_users_json(
+    json_data: Data<'_>,
+    _admin: AdminUser,
+) -> Result<Json<String>, Status> {
+    let db = get_db().await.map_err(|_| Status::InternalServerError)?;
+
+    let bytes = json_data
+        .open(2.mebibytes())
+        .into_bytes()
+        .await
+        .map_err(|_| Status::BadRequest)?
+        .into_inner();
+
+    match AdminUseCases::import_users_from_json(&db, &bytes).await {
+        Ok(count) => Ok(Json(format!("Successfully imported {} users.", count))),
+        Err(e) => {
+            eprintln!("Failed to import users: {}", e);
+            Err(Status::InternalServerError)
+        }
+    }
+}
+
 #[get("/users")]
 pub async fn get_users(_admin: AdminUser) -> Result<Json<Vec<crate::domain::User>>, Status> {
     let db = get_db().await.map_err(|_| Status::InternalServerError)?;

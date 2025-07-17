@@ -1,9 +1,9 @@
 use mongodb::bson::oid::ObjectId;
 use serde::{Serialize, Deserialize};
-use super::{UserRole, subscription::Subscription};
+pub use super::{UserRole, subscription::Subscription};
 
 /// Domain model for User
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Default)]
 pub struct User {
     #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
     pub id: Option<ObjectId>,
@@ -17,6 +17,7 @@ pub struct User {
     pub image_url: Option<String>,
     #[serde(default)]
     pub subscriptions: Vec<Subscription>,
+    pub subscribed: bool,
 }
 
 impl User {
@@ -31,6 +32,7 @@ impl User {
             instagram_link: None,
             image_url: None,
             subscriptions: Vec::new(),
+            subscribed: false,
         }
     }
 
