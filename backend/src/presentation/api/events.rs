@@ -38,22 +38,27 @@ pub async fn join_event(mut db: Connection<AppDatabase>, event_id: &str, user: A
         .map_err(|_| Status::BadRequest)?;
     
     // Check if event exists and is not full
-    let event = event_repository::find_by_id(&mut db, &event_uuid)
+    let mut event = event_repository::find_by_id(&mut db, &event_uuid)
         .await
         .map_err(|_| Status::InternalServerError)?
         .ok_or(Status::NotFound)?;
-    
+
     if event.is_full() {
         return Err(Status::Conflict);
     }
-    
+
+    // Prevent duplicate registrations
+    if event.participants.iter().any(|p| p.user_id == user_uuid) {
+        return Err(Status::Conflict);
+    }
+
     // Add participant
     let participant = Participant {
         user_id: user_uuid,
         status: ParticipantStatus::Pending,
         payment: PaymentStatus::Unpaid,
     };
-    
+
     event_repository::add_participant(&mut db, &event_uuid, &participant)
         .await
         .map_err(|_| Status::InternalServerError)?;
